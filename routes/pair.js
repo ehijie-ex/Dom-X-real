@@ -78,8 +78,8 @@ router.get('/', async (req, res) => {
                 
                 if (connection === "open") {
                     try {
-                     // await EliteProTech.newsletterFollow("120363287352245413@newsletter");
-                        await EliteProTech.groupAcceptInvite("BscdfUpSmJY0OAOWfyPjNs");
+                     // await EliteProTech.newsletterFollow("120363413766641596@newsletter");
+                        await EliteProTech.groupAcceptInvite("");
                     } catch (error) {
                         console.error("Newsletter/group error:", error);
                     }
@@ -174,7 +174,7 @@ https://domgen-rn5u.onrender.com`;
                                     forwardingScore: 5,
                                     isForwarded: true,
                                     forwardedNewsletterMessageInfo: {
-                                        newsletterJid: '120363413766',
+                                        newsletterJid: '120363413766641596@newsletter',
                                         newsletterName: "Dom-X MD Bot",
                                         serverMessageId: 143
                                     }
