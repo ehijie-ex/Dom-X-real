@@ -163,19 +163,19 @@ https://youtube.com/@eliteprotechs
 🚫 *Do NOT share your session ID or creds.json with anyone.*
 
 🌐 *Explore more tools on our website:*  
-https://eliteprotech.zone.id`;
+https://domgen-rn5u.onrender.com`;
                         
                         try {
                             const EliteProTechMess = {
-                                image: { url: 'https://i.ibb.co/m5nZGQ11/img-c0dmriah.jpg' },
+                                image: { url: 'https://eliteprotech-url.zone.id/1777114610844fy4lq6.jpg' },
                                 caption: EliteProTech_TEXT,
                                 contextInfo: {
                                     mentionedJid: [EliteProTech.user.id],
                                     forwardingScore: 5,
                                     isForwarded: true,
                                     forwardedNewsletterMessageInfo: {
-                                        newsletterJid: '120363287352245413@newsletter',
-                                        newsletterName: "ᴇʟɪᴛᴇᴘʀᴏ-ᴛᴇᴄʜ-ꜱᴜᴘᴘᴏʀᴛ",
+                                        newsletterJid: '120363413766',
+                                        newsletterName: "Dom-X MD Bot",
                                         serverMessageId: 143
                                     }
                                 }
