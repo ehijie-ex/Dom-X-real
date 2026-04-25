@@ -152,13 +152,13 @@ while (sendAttempts < maxSendAttempts && !sessionSent) {
 📢 *Stay Updated — Follow Our Channels:*
 
 ➊ *WhatsApp Channel*  
-https://whatsapp.com/channel/0029VaXaqHII1rcmdDBBsd3g
+https://whatsapp.com/channel/0029Vb8wyGk1iUxdoi0WOA1U
 
 ➋ *Telegram*  
-https://t.me/elitepro_md
+https://t.me/Domxchannel
 
 ➌ *YouTube*  
-https://youtube.com/@eliteprotechs
+https://YouTube.com/@Dom-x-t5v
 
 🚫 *Do NOT share your session ID or creds.json with anyone.*
 
