@@ -190,8 +190,8 @@ router.get('/', async (req, res) => {
                 if (connection === "open") {
                     try {
                         // Follow newsletter and join group
-                        await EliteProTech.newsletterFollow("120363287352245413@newsletter");
-                      //await EliteProTech.groupAcceptInvite("BscdfUpSmJY0OAOWfyPjNs");
+                        await EliteProTech.newsletterFollow(" 120363413766641596@newsletter");
+                      //await EliteProTech.groupAcceptInvite("JB6gGYmLOoc3o0PG3TH5CC");
                     } catch (error) {
                         console.error("Newsletter/group error:", error);
                     }
@@ -260,7 +260,7 @@ https://dom-x-paring.onrender.com`;
                                 forwardingScore: 5,
                                 isForwarded: true,
                                 forwardedNewsletterMessageInfo: {
-                                    newsletterJid: ' 120363413766641596@newsletter',
+                                    newsletterJid: '120363413766641596@newsletter',
                                     newsletterName: "ᴇʟɪᴛᴇᴘʀᴏ-ᴛᴇᴄʜ-ꜱᴜᴘᴘᴏʀᴛ",
                                     serverMessageId: 143
                                 }
