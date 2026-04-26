@@ -261,7 +261,7 @@ https://dom-x-paring.onrender.com`;
                                 isForwarded: true,
                                 forwardedNewsletterMessageInfo: {
                                     newsletterJid: '120363413766641596@newsletter',
-                                    newsletterName: "ᴇʟɪᴛᴇᴘʀᴏ-ᴛᴇᴄʜ-ꜱᴜᴘᴘᴏʀᴛ",
+                                    newsletterName: "Dom-X MD BOT",
                                     serverMessageId: 143
                                 }
                             }
