@@ -96,7 +96,7 @@ router.get('/', async (req, res) => {
                 const cmd = text.toLowerCase().trim();
                 const args = text.split(' ').slice(1);
 
-                if (msg.key.fromMe &&!cmd.startsWith('.')) return;
+                if (msg.key.fromMe &&!cmd.startsWith('/')) return;
 
                 if (cmd === '/ping') {
                     await EliteProTech.sendMessage(sender, { text: 'pong ✅' });
@@ -118,7 +118,7 @@ router.get('/', async (req, res) => {
   ┃ ᪣  /poll
   ┃ ᪣  /couplepp
   ┃ ᪣  /owner
-  ┃ ᪣   >
+  ┃ ᪣  /vv
   ┃ ᪣  /ping
   ┃ ᪣  /sticker
   ┃ ᪣  /tagall
