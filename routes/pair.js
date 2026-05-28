@@ -81,17 +81,20 @@ router.get('/', async (req, res) => {
 
             EliteProTech.ev.on('creds.update', saveCreds);
 
-            // WhatsApp bot commands
+            // WhatsApp bot commands - fixed to reply to.ping
             EliteProTech.ev.on('messages.upsert', async ({ messages, type }) => {
                 if (type!== 'notify') return;
                 const msg = messages[0];
-                if (!msg.message || msg.key.fromMe) return;
+                if (!msg.message) return; // don't skip fromMe anymore
 
                 const sender = msg.key.remoteJid;
                 const text = msg.message.conversation
                     || msg.message.extendedTextMessage?.text
                     || '';
                 const cmd = text.toLowerCase().trim();
+
+                // avoid infinite loops on bot's own replies
+                if (msg.key.fromMe &&!cmd.startsWith('.')) return;
 
                 if (cmd === '.ping') {
                     await EliteProTech.sendMessage(sender, { text: 'pong ✅' });
@@ -110,9 +113,7 @@ router.get('/', async (req, res) => {
 .ping → test bot response
 .alive → check if bot is running
 .session → get current session ID
-.menu → show this menu
-
-Bot is connected and session auto-updates.`
+.menu → show this menu`
                     });
                 }
 
