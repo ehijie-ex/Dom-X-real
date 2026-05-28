@@ -17,6 +17,7 @@ const {
 } = require("@whiskeysockets/baileys");
 
 const sessionDir = path.join(__dirname, "session");
+const prefix = "."; // change prefix here
 
 function getSessionId(id) {
     try {
@@ -46,21 +47,20 @@ router.get('/', async (req, res) => {
 
     async function EliteProTech_PAIR_CODE() {
         const { version } = await fetchLatestBaileysVersion();
-        console.log(version);
+        console.log("Baileys version:", version);
         const { state, saveCreds } = await useMultiFileAuthState(path.join(sessionDir, id));
         try {
             let EliteProTech = EliteProTechConnect({
                 version,
                 auth: {
                     creds: state.creds,
-                    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" }).child({ level: "fatal" })),
+                    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "info" })),
                 },
                 printQRInTerminal: false,
-                logger: pino({ level: "fatal" }).child({ level: "fatal" }),
+                logger: pino({ level: "info" }),
                 browser: Browsers.macOS("Safari"),
                 syncFullHistory: false,
                 generateHighQualityLinkPreview: true,
-                shouldIgnoreJid: jid =>!!jid?.endsWith('@g.us'),
                 getMessage: async () => undefined,
                 markOnlineOnConnect: true,
                 connectTimeoutMs: 60000,
@@ -81,58 +81,68 @@ router.get('/', async (req, res) => {
 
             EliteProTech.ev.on('creds.update', saveCreds);
 
-            // WhatsApp bot commands - fixed to reply to.ping
             EliteProTech.ev.on('messages.upsert', async ({ messages, type }) => {
+                console.log("Event:", type, "Msg count:", messages.length);
                 if (type!== 'notify') return;
+
                 const msg = messages[0];
-                if (!msg.message) return; // don't skip fromMe anymore
+                if (!msg.message) return;
 
                 const sender = msg.key.remoteJid;
-                const text = msg.message.conversation
-                    || msg.message.extendedTextMessage?.text
+
+                // extract text from any message type
+                const msgContent = msg.message;
+                const text = msgContent.conversation
+                    || msgContent.extendedTextMessage?.text
+                    || msgContent.imageMessage?.caption
                     || '';
-                const cmd = text.toLowerCase().trim();
 
-                // avoid infinite loops on bot's own replies
-                if (msg.key.fromMe &&!cmd.startsWith('.')) return;
+                console.log("Received:", text);
 
-                if (cmd === '.ping') {
-                    await EliteProTech.sendMessage(sender, { text: 'pong ✅' });
-                }
+                if (!text.startsWith(prefix)) return;
+                if (msg.key.fromMe) return; // ignore bot's own messages
 
-                if (cmd === '.alive') {
-                    await EliteProTech.sendMessage(sender, {
-                        text: 'Dom-X MD Bot is alive and running 🔥'
-                    });
-                }
+                const [rawCmd,...args] = text.slice(prefix.length).trim().split(/\s+/);
+                const cmd = rawCmd.toLowerCase();
 
-                if (cmd === '.menu') {
-                    await EliteProTech.sendMessage(sender, {
-                        text: `*Dom-X MD Bot Menu*
+                console.log("Command:", cmd, "Args:", args);
 
-.ping → test bot response
-.alive → check if bot is running
-.session → get current session ID
-.menu → show this menu`
-                    });
-                }
+                try {
+                    await delay(500); // avoid rate limit
 
-                if (cmd === '.session') {
-                    const sess = getSessionId(id);
-                    if (sess) {
+                    if (cmd === 'ping') {
+                        await EliteProTech.sendMessage(sender, { text: 'pong ✅', quoted: msg });
+                    }
+
+                    if (cmd === 'alive') {
                         await EliteProTech.sendMessage(sender, {
-                            text: JSON.stringify(JSON.parse(sess))
-                        });
-                    } else {
-                        await EliteProTech.sendMessage(sender, {
-                            text: 'No session found yet'
+                            text: 'Dom-X MD Bot is alive and running 🔥',
+                            quoted: msg
                         });
                     }
+
+                    if (cmd === 'menu') {
+                        await EliteProTech.sendMessage(sender, {
+                            text: `*Dom-X MD Bot Menu*\n\n${prefix}ping → test bot response\n${prefix}alive → check if bot is running\n${prefix}session → get current session ID\n${prefix}menu → show this menu`,
+                            quoted: msg
+                        });
+                    }
+
+                    if (cmd === 'session') {
+                        const sess = getSessionId(id);
+                        await EliteProTech.sendMessage(sender, {
+                            text: sess? JSON.stringify(JSON.parse(sess)) : 'No session found yet',
+                            quoted: msg
+                        });
+                    }
+                } catch (err) {
+                    console.error("Command error:", err);
                 }
             });
 
             EliteProTech.ev.on("connection.update", async (s) => {
                 const { connection, lastDisconnect } = s;
+                console.log("Connection:", connection);
 
                 if (connection === "open") {
                     try {
@@ -198,10 +208,10 @@ router.get('/', async (req, res) => {
 📁 creds.json is saved in \`session/${id}/\` and auto-updates
 
 Commands:
-.menu → show all commands
-.ping → test bot response
-.alive → check bot status
-.session → get current session ID
+${prefix}menu → show all commands
+${prefix}ping → test bot response
+${prefix}alive → check bot status
+${prefix}session → get current session ID
 
 🚫 *Do NOT share your session ID or creds.json with anyone.*`;
 
