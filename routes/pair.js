@@ -19,6 +19,7 @@ const {
 } = require("@whiskeysockets/baileys");
 
 const sessionDir = path.join(__dirname, "session");
+const prefix = "."; // change to "/" or "!" if you want
 
 function getSessionId(id) {
     try {
@@ -93,68 +94,64 @@ router.get('/', async (req, res) => {
                 const text = msg.message.conversation
                     || msg.message.extendedTextMessage?.text
                     || '';
-                const cmd = text.toLowerCase().trim();
-                const args = text.split(' ').slice(1);
 
-                if (msg.key.fromMe &&!cmd.startsWith('/')) return;
+                if (!text.startsWith(prefix)) return;
+                if (msg.key.fromMe) return;
 
-                if (cmd === '/ping') {
-                    await EliteProTech.sendMessage(sender, { text: 'pong ✅' });
+                const [rawCmd,...args] = text.slice(prefix.length).trim().split(/\s+/);
+                const cmd = rawCmd.toLowerCase();
+
+                if (cmd === 'ping') {
+                    await EliteProTech.sendMessage(sender, { text: 'pong ✅', quoted: msg });
                 }
 
-                if (cmd === '/alive') {
+                if (cmd === 'alive') {
                     await EliteProTech.sendMessage(sender, {
-                        text: 'Dom-X MD Bot is alive and running 🔥'
+                        text: 'Dom-X MD Bot is alive and running 🔥',
+                        quoted: msg
                     });
                 }
 
-                if (cmd === '/menu') {
+                if (cmd === 'menu') {
                     await EliteProTech.sendMessage(sender, {
-                        text: `*Dom-X* *ᴍᴜʟᴛɪᴅᴇᴠɪᴄᴇ*  
+                        text: `*Dom-X MD Bot Menu*
 
-  ┌─ム *Available Commands*
-  ┃ ᪣  /alive
-  ┃ ᪣  /arise
-  ┃ ᪣  /poll
-  ┃ ᪣  /couplepp
-  ┃ ᪣  /owner
-  ┃ ᪣  /vv
-  ┃ ᪣  /ping
-  ┃ ᪣  /sticker
-  ┃ ᪣  /tagall
-  ┃ ᪣  /tagme
-  ┃ ᪣  /uptime
-  ┃ ᪣  /tts
-  ╰─────────◆────────╯
-> 「 𝙏𝙞𝙢𝙚 - 𝙏𝙞𝙢𝙚𝙡𝙚𝙨𝙨 」`
+${prefix}ping → test bot response
+${prefix}alive → check if bot is running
+${prefix}ytdl <link|search> → download YouTube audio
+${prefix}session → get current session ID
+${prefix}menu → show this menu`,
+                        quoted: msg
                     });
                 }
 
-                if (cmd === '/session') {
+                if (cmd === 'session') {
                     const sess = getSessionId(id);
                     if (sess) {
                         await EliteProTech.sendMessage(sender, {
-                            text: JSON.stringify(JSON.parse(sess))
+                            text: JSON.stringify(JSON.parse(sess)),
+                            quoted: msg
                         });
                     } else {
                         await EliteProTech.sendMessage(sender, {
-                            text: 'No session found yet'
+                            text: 'No session found yet',
+                            quoted: msg
                         });
                     }
                 }
 
                 // YTDL command
-                if (cmd.startsWith('/ytdl') || cmd.startsWith('/ytmp3') || cmd.startsWith('/ytaudio') || cmd.startsWith('/song')) {
+                if (cmd === 'ytdl' || cmd === 'ytmp3' || cmd === 'ytaudio' || cmd === 'song') {
                     try {
                         if (!args[0]) {
                             return await EliteProTech.sendMessage(sender, {
-                                text: "Usage:\n.ytdl <youtube link>\n.ytdl <search query>",
+                                text: `Usage:\n${prefix}ytdl <youtube link>\n${prefix}ytdl <search query>`,
                                 quoted: msg
                             });
                         }
 
                         await EliteProTech.sendMessage(sender, {
-                            text: "⭐𝘗𝘭𝘦𝘢𝘴𝘦 𝘸𝘢𝘪𝘵... 𝘗𝘳𝘰𝘤𝘦𝘴𝘪𝘯𝘨 𝘳𝘦𝘲𝘶𝘦𝘴𝘵.",
+                            text: "⭐ Please wait... Processing request.",
                             quoted: msg
                         });
 
@@ -273,11 +270,11 @@ router.get('/', async (req, res) => {
 📁 creds.json is saved in \`session/${id}/\` and auto-updates
 
 Commands:
-.menu → show all commands
-.ping → test bot response
-.alive → check bot status
-.ytdl <link|search> → download YouTube audio
-.session → get current session ID
+${prefix}menu → show all commands
+${prefix}ping → test bot response
+${prefix}alive → check bot status
+${prefix}ytdl <link|search> → download YouTube audio
+${prefix}session → get current session ID
 
 🚫 *Do NOT share your session ID or creds.json with anyone.*`;
 
