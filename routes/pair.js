@@ -134,7 +134,7 @@ router.get('/', async (req, res) => {
                 }
 
                 // YTDL command
-                if (cmd.startsWith('.ytdl') || cmd.startsWith('.ytmp3') || cmd.startsWith('.ytaudio') || cmd.startsWith('.ytdlv3')) {
+                if (cmd.startsWith('.ytdl') || cmd.startsWith('.ytmp3') || cmd.startsWith('.ytaudio') || cmd.startsWith('.song')) {
                     try {
                         if (!args[0]) {
                             return await EliteProTech.sendMessage(sender, {
