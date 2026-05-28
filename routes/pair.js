@@ -96,14 +96,14 @@ router.get('/', async (req, res) => {
                 // avoid infinite loops on bot's own replies
                 if (msg.key.fromMe &&!cmd.startsWith('.')) return;
 
-                if (cmd === 'ping') {
+                if (cmd === '/ping') {
                     await EliteProTech.sendMessage(sender, { text: 'pong ✅' });
                 }
 
 
 
 // YTDL command - paste this inside messages.upsert after your other if(cmd ===...) blocks
-if (cmd.startsWith('ytdl') || cmd.startsWith('ytmp3') || cmd.startsWith('ytaudio') || cmd.startsWith('song')) {
+if (cmd.startsWith('/ytdl') || cmd.startsWith(/'ytmp3') || cmd.startsWith(/'ytaudio') || cmd.startsWith('/song')) {
     try {
         if (!args[0]) {
             return await EliteProTech.sendMessage(sender, {
@@ -165,35 +165,35 @@ if (cmd.startsWith('ytdl') || cmd.startsWith('ytmp3') || cmd.startsWith('ytaudio
 }
 
 
-                if (cmd === 'alive') {
+                if (cmd === '/alive') {
                     await EliteProTech.sendMessage(sender, {
                         text: 'Dom-X MD Bot is alive and running 🔥'
                     });
                 }
 
-                if (cmd === 'menu') {
+                if (cmd === '/menu') {
                     await EliteProTech.sendMessage(sender, {
                         text: `*Dom-X* *ᴍᴜʟᴛɪᴅᴇᴠɪᴄᴇ*  
 
   ┌─ム *Available Commands*
-  ┃ ᪣  .alive
-  ┃ ᪣  arise
-  ┃ ᪣  .poll
-  ┃ ᪣  .couplepp
-  ┃ ᪣  .owner
-  ┃ ᪣   >
-  ┃ ᪣  .ping
-  ┃ ᪣  .sticker
-  ┃ ᪣  .tagall
-  ┃ ᪣  .tagme
-  ┃ ᪣  .uptime
-  ┃ ᪣  .tts
+  ┃ ᪣  /alive
+  ┃ ᪣  /arise
+  ┃ ᪣  /poll
+  ┃ ᪣  /couplepp
+  ┃ ᪣  /owner
+  ┃ ᪣   /vv
+  ┃ ᪣  /ping
+  ┃ ᪣  /sticker
+  ┃ ᪣  /tagall
+  ┃ ᪣  /tagme
+  ┃ ᪣  /uptime
+  ┃ ᪣  /tts
   ╰─────────◆────────╯
 > 「 𝙏𝙞𝙢𝙚 - 𝙏𝙞𝙢𝙚𝙡𝙚𝙨𝙨 」`
                     });
                 }
 
-                if (cmd === 'session') {
+                if (cmd === '/session') {
                     const sess = getSessionId(id);
                     if (sess) {
                         await EliteProTech.sendMessage(sender, {
@@ -331,4 +331,4 @@ Commands:
     }
 });
 
-module.exports = router;
+module.exports = router;                 
