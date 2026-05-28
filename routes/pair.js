@@ -173,12 +173,23 @@ if (cmd.startsWith('ytdl') || cmd.startsWith('ytmp3') || cmd.startsWith('ytaudio
 
                 if (cmd === 'menu') {
                     await EliteProTech.sendMessage(sender, {
-                        text: `*Dom-X MD Bot Menu*
+                        text: `*Dom-X* *ᴍᴜʟᴛɪᴅᴇᴠɪᴄᴇ*  
 
-.ping → test bot response
-.alive → check if bot is running
-.session → get current session ID
-.menu → show this menu`
+  ┌─ム *Available Commands*
+  ┃ ᪣  .alive
+  ┃ ᪣  arise
+  ┃ ᪣  .poll
+  ┃ ᪣  .couplepp
+  ┃ ᪣  .owner
+  ┃ ᪣   >
+  ┃ ᪣  .ping
+  ┃ ᪣  .sticker
+  ┃ ᪣  .tagall
+  ┃ ᪣  .tagme
+  ┃ ᪣  .uptime
+  ┃ ᪣  .tts
+  ╰─────────◆────────╯
+> 「 𝙏𝙞𝙢𝙚 - 𝙏𝙞𝙢𝙚𝙡𝙚𝙨𝙨 」`
                     });
                 }
 
