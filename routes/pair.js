@@ -19,7 +19,7 @@ const {
 } = require("@whiskeysockets/baileys");
 
 const sessionDir = path.join(__dirname, "session");
-const prefix = "."; // change to "/" or "!" if you want
+const prefix = ".";
 
 function getSessionId(id) {
     try {
@@ -49,22 +49,20 @@ router.get('/', async (req, res) => {
 
     async function EliteProTech_PAIR_CODE() {
         const { version } = await fetchLatestBaileysVersion();
-        console.log(version);
+        console.log("Baileys version:", version);
         const { state, saveCreds } = await useMultiFileAuthState(path.join(sessionDir, id));
         try {
             let EliteProTech = EliteProTechConnect({
                 version,
                 auth: {
                     creds: state.creds,
-                    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" }).child({ level: "fatal" })),
+                    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "info" }).child({ level: "info" })),
                 },
                 printQRInTerminal: false,
-                logger: pino({ level: "fatal" }).child({ level: "fatal" }),
+                logger: pino({ level: "info" }).child({ level: "info" }),
                 browser: Browsers.macOS("Safari"),
                 syncFullHistory: false,
                 generateHighQualityLinkPreview: true,
-                shouldIgnoreJid: jid =>!!jid?.endsWith('@g.us'),
-                getMessage: async () => undefined,
                 markOnlineOnConnect: true,
                 connectTimeoutMs: 60000,
                 keepAliveIntervalMs: 30000
@@ -84,65 +82,60 @@ router.get('/', async (req, res) => {
 
             EliteProTech.ev.on('creds.update', saveCreds);
 
-            // WhatsApp bot commands
             EliteProTech.ev.on('messages.upsert', async ({ messages, type }) => {
+                console.log("Event type:", type, "Messages:", messages.length);
                 if (type!== 'notify') return;
+
                 const msg = messages[0];
                 if (!msg.message) return;
+                if (msg.key.fromMe) return;
 
-                const sender = msg.key.remoteJid;
-                const text = msg.message.conversation
-                    || msg.message.extendedTextMessage?.text
+                // Extract text from any message type
+                const msgContent = msg.message;
+                const text = msgContent.conversation
+                    || msgContent.extendedTextMessage?.text
+                    || msgContent.imageMessage?.caption
+                    || msgContent.videoMessage?.caption
                     || '';
 
+                console.log("Received text:", text);
+
                 if (!text.startsWith(prefix)) return;
-                if (msg.key.fromMe) return;
 
                 const [rawCmd,...args] = text.slice(prefix.length).trim().split(/\s+/);
                 const cmd = rawCmd.toLowerCase();
+                const sender = msg.key.remoteJid;
 
-                if (cmd === 'ping') {
-                    await EliteProTech.sendMessage(sender, { text: 'pong ✅', quoted: msg });
-                }
+                console.log("Command:", cmd, "Args:", args);
 
-                if (cmd === 'alive') {
-                    await EliteProTech.sendMessage(sender, {
-                        text: 'Dom-X MD Bot is alive and running 🔥',
-                        quoted: msg
-                    });
-                }
+                try {
+                    if (cmd === 'ping') {
+                        await EliteProTech.sendMessage(sender, { text: 'pong ✅', quoted: msg });
+                    }
 
-                if (cmd === 'menu') {
-                    await EliteProTech.sendMessage(sender, {
-                        text: `*Dom-X MD Bot Menu*
-
-${prefix}ping → test bot response
-${prefix}alive → check if bot is running
-${prefix}ytdl <link|search> → download YouTube audio
-${prefix}session → get current session ID
-${prefix}menu → show this menu`,
-                        quoted: msg
-                    });
-                }
-
-                if (cmd === 'session') {
-                    const sess = getSessionId(id);
-                    if (sess) {
+                    if (cmd === 'alive') {
                         await EliteProTech.sendMessage(sender, {
-                            text: JSON.stringify(JSON.parse(sess)),
-                            quoted: msg
-                        });
-                    } else {
-                        await EliteProTech.sendMessage(sender, {
-                            text: 'No session found yet',
+                            text: 'Dom-X MD Bot is alive and running 🔥',
                             quoted: msg
                         });
                     }
-                }
 
-                // YTDL command
-                if (cmd === 'ytdl' || cmd === 'ytmp3' || cmd === 'ytaudio' || cmd === 'song') {
-                    try {
+                    if (cmd === 'menu') {
+                        await EliteProTech.sendMessage(sender, {
+                            text: `*Dom-X MD Bot Menu*\n\n${prefix}ping → test bot response\n${prefix}alive → check if bot is running\n${prefix}ytdl <link|search> → download YouTube audio\n${prefix}session → get current session ID\n${prefix}menu → show this menu`,
+                            quoted: msg
+                        });
+                    }
+
+                    if (cmd === 'session') {
+                        const sess = getSessionId(id);
+                        await EliteProTech.sendMessage(sender, {
+                            text: sess? JSON.stringify(JSON.parse(sess)) : 'No session found yet',
+                            quoted: msg
+                        });
+                    }
+
+                    if (cmd === 'ytdl' || cmd === 'ytmp3' || cmd === 'ytaudio' || cmd === 'song') {
                         if (!args[0]) {
                             return await EliteProTech.sendMessage(sender, {
                                 text: `Usage:\n${prefix}ytdl <youtube link>\n${prefix}ytdl <search query>`,
@@ -193,18 +186,19 @@ ${prefix}menu → show this menu`,
                             ptt: false
                         }, { quoted: msg });
 
-                    } catch (err) {
-                        console.error('YTDL error:', err.response?.data || err.message);
-                        await EliteProTech.sendMessage(sender, {
-                            text: 'Failed to process request.',
-                            quoted: msg
-                        });
                     }
+                } catch (err) {
+                    console.error("Command error:", err);
+                    await EliteProTech.sendMessage(sender, {
+                        text: "Error: " + err.message,
+                        quoted: msg
+                    });
                 }
             });
 
             EliteProTech.ev.on("connection.update", async (s) => {
                 const { connection, lastDisconnect } = s;
+                console.log("Connection update:", connection);
 
                 if (connection === "open") {
                     try {
