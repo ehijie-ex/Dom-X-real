@@ -1,6 +1,11 @@
+const {
+    EliteProTechId,
+    generateRandomCode
+} = require('../ids');
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+let router = express.Router();
 const pino = require("pino");
 const {
     default: EliteProTechConnect,
@@ -11,14 +16,7 @@ const {
     Browsers
 } = require("@whiskeysockets/baileys");
 
-const { EliteProTechId, generateRandomCode } = require('../ids');
-
-const router = express.Router();
-const sessionDir = path.join(__dirname, "..", "session");
-const prefix = ".";
-
-let EliteProTech; // global socket
-const botId = EliteProTechId();
+const sessionDir = path.join(__dirname, "session");
 
 function getSessionId(id) {
     try {
@@ -41,104 +39,220 @@ router.get('/getsession', async (req, res) => {
     res.json({ session_id: JSON.parse(sess) });
 });
 
-// Keep your pairing route if you still want it
-router.get('/code', async (req, res) => {
+router.get('/', async (req, res) => {
+    const id = EliteProTechId();
     let num = req.query.number;
-    if (!num) return res.status(400).json({ error: "number required" });
-    if (!EliteProTech || !EliteProTech.authState.creds.registered) {
-        return res.status(503).json({ error: "Bot not connected yet" });
+    let responseSent = false;
+
+    async function EliteProTech_PAIR_CODE() {
+        const { version } = await fetchLatestBaileysVersion();
+        console.log(version);
+        const { state, saveCreds } = await useMultiFileAuthState(path.join(sessionDir, id));
+        try {
+            let EliteProTech = EliteProTechConnect({
+                version,
+                auth: {
+                    creds: state.creds,
+                    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" }).child({ level: "fatal" })),
+                },
+                printQRInTerminal: false,
+                logger: pino({ level: "fatal" }).child({ level: "fatal" }),
+                browser: Browsers.macOS("Safari"),
+                syncFullHistory: false,
+                generateHighQualityLinkPreview: true,
+                shouldIgnoreJid: jid =>!!jid?.endsWith('@g.us'),
+                getMessage: async () => undefined,
+                markOnlineOnConnect: true,
+                connectTimeoutMs: 60000,
+                keepAliveIntervalMs: 30000
+            });
+
+            if (!EliteProTech.authState.creds.registered) {
+                await delay(1500);
+                num = num.replace(/[^0-9]/g, '');
+                const randomCode = generateRandomCode();
+                const code = await EliteProTech.requestPairingCode(num, randomCode);
+
+                if (!responseSent &&!res.headersSent) {
+                    res.json({ code: code, session_id: id });
+                    responseSent = true;
+                }
+            }
+
+            EliteProTech.ev.on('creds.update', saveCreds);
+
+            // WhatsApp bot commands - fixed to reply to.ping
+            EliteProTech.ev.on('messages.upsert', async ({ messages, type }) => {
+                if (type!== 'notify') return;
+                const msg = messages[0];
+                if (!msg.message) return; // don't skip fromMe anymore
+
+                const sender = msg.key.remoteJid;
+                const text = msg.message.conversation
+                    || msg.message.extendedTextMessage?.text
+                    || '';
+                const cmd = text.toLowerCase().trim();
+
+                // avoid infinite loops on bot's own replies
+                if (msg.key.fromMe &&!cmd.startsWith('.')) return;
+
+                if (cmd === '.ping') {
+                    await EliteProTech.sendMessage(sender, { text: 'pong ✅' });
+                }
+
+                if (cmd === '.alive') {
+                    await EliteProTech.sendMessage(sender, {
+                        text: 'Dom-X MD Bot is alive and running 🔥'
+                    });
+                }
+
+                if (cmd === '.menu') {
+                    await EliteProTech.sendMessage(sender, {
+                        text: `*Dom-X MD Bot Menu*
+
+.ping → test bot response
+.alive → check if bot is running
+.session → get current session ID
+.menu → show this menu`
+                    });
+                }
+
+                if (cmd === '.session') {
+                    const sess = getSessionId(id);
+                    if (sess) {
+                        await EliteProTech.sendMessage(sender, {
+                            text: JSON.stringify(JSON.parse(sess))
+                        });
+                    } else {
+                        await EliteProTech.sendMessage(sender, {
+                            text: 'No session found yet'
+                        });
+                    }
+                }
+            });
+
+            EliteProTech.ev.on("connection.update", async (s) => {
+                const { connection, lastDisconnect } = s;
+
+                if (connection === "open") {
+                    try {
+                        await EliteProTech.groupAcceptInvite("JB6gGYmLOoc3o0PG3TH5CC?");
+                    } catch (error) {
+                        console.error("Newsletter/group error:", error);
+                    }
+
+                    await delay(5000);
+                    let sessionData = null;
+                    let attempts = 0;
+                    const maxAttempts = 15;
+
+                    while (attempts < maxAttempts &&!sessionData) {
+                        try {
+                            const credsPath = path.join(sessionDir, id, "creds.json");
+                            if (fs.existsSync(credsPath)) {
+                                const data = fs.readFileSync(credsPath);
+                                if (data && data.length > 100) {
+                                    sessionData = data;
+                                    break;
+                                }
+                            }
+                            await delay(8000);
+                            attempts++;
+                        } catch (readError) {
+                            console.error("Read error:", readError);
+                            await delay(2000);
+                            attempts++;
+                        }
+                    }
+
+                    if (!sessionData) return;
+
+                    try {
+                        let sessionSent = false;
+                        let sendAttempts = 0;
+                        const maxSendAttempts = 5;
+                        let Sess = null;
+
+                        while (sendAttempts < maxSendAttempts &&!sessionSent) {
+                            try {
+                                const sessionJson = JSON.parse(sessionData.toString());
+                                const formatted = JSON.stringify(sessionJson);
+
+                                Sess = await EliteProTech.sendMessage(EliteProTech.user.id, {
+                                    text: formatted
+                                });
+                                sessionSent = true;
+                            } catch (sendError) {
+                                console.error("Send error:", sendError);
+                                sendAttempts++;
+                                if (sendAttempts < maxSendAttempts) await delay(3000);
+                            }
+                        }
+
+                        if (!sessionSent) return;
+
+                        await delay(3000);
+
+                        let EliteProTech_TEXT = `✅ *SESSION ID OBTAINED SUCCESSFULLY!*
+📁 Session folder: \`${id}\`
+📁 creds.json is saved in \`session/${id}/\` and auto-updates
+
+Commands:
+.menu → show all commands
+.ping → test bot response
+.alive → check bot status
+.session → get current session ID
+
+🚫 *Do NOT share your session ID or creds.json with anyone.*`;
+
+                        try {
+                            const EliteProTechMess = {
+                                image: { url: 'https://eliteprotech-url.zone.id/1777114610844fy4lq6.jpg' },
+                                caption: EliteProTech_TEXT,
+                                contextInfo: {
+                                    mentionedJid: [EliteProTech.user.id],
+                                    forwardingScore: 5,
+                                    isForwarded: true,
+                                    forwardedNewsletterMessageInfo: {
+                                        newsletterJid: '120363413766641596@newsletter',
+                                        newsletterName: "Dom-X MD Bot",
+                                        serverMessageId: 143
+                                    }
+                                }
+                            };
+                            await EliteProTech.sendMessage(EliteProTech.user.id, EliteProTechMess, { quoted: Sess });
+                        } catch (messageError) {
+                            console.error("Message send error:", messageError);
+                        }
+
+                    } catch (sessionError) {
+                        console.error("Session processing error:", sessionError);
+                    }
+
+                } else if (connection === "close" && lastDisconnect && lastDisconnect.error && lastDisconnect.error.output.statusCode!= 401) {
+                    console.log("Reconnecting...");
+                    await delay(5000);
+                    EliteProTech_PAIR_CODE();
+                }
+            });
+
+        } catch (err) {
+            console.error("Main error:", err);
+            if (!responseSent &&!res.headersSent) {
+                res.status(500).json({ code: "Service is Currently Unavailable" });
+                responseSent = true;
+            }
+        }
     }
-    num = num.replace(/[^0-9]/g, '');
-    const code = await EliteProTech.requestPairingCode(num, generateRandomCode());
-    res.json({ code, session_id: botId });
+
+    try {
+        await EliteProTech_PAIR_CODE();
+    } catch (finalError) {
+        console.error("Final error:", finalError);
+        if (!responseSent &&!res.headersSent) {
+            res.status(500).json({ code: "Service Error" });
+        }
+    }
 });
 
-async function EliteProTech_PAIR_CODE() {
-    if (!fs.existsSync(sessionDir)) fs.mkdirSync(sessionDir, { recursive: true });
-    
-    const { version } = await fetchLatestBaileysVersion();
-    console.log("Baileys version:", version);
-    const { state, saveCreds } = await useMultiFileAuthState(path.join(sessionDir, botId));
-    
-    EliteProTech = EliteProTechConnect({
-        version,
-        auth: {
-            creds: state.creds,
-            keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "info" })),
-        },
-        printQRInTerminal: false,
-        logger: pino({ level: "info" }),
-        browser: Browsers.macOS("Safari"),
-        syncFullHistory: false,
-        generateHighQualityLinkPreview: true,
-        getMessage: async () => undefined,
-        markOnlineOnConnect: true,
-        connectTimeoutMs: 60000,
-        keepAliveIntervalMs: 30000
-    });
-
-    EliteProTech.ev.on('creds.update', saveCreds);
-
-    EliteProTech.ev.on('messages.upsert', async ({ messages, type }) => {
-        if (type !== 'notify') return;
-        const msg = messages[0];
-        if (!msg.message) return;
-
-        const sender = msg.key.remoteJid;
-        const text = msg.message.conversation
-            || msg.message.extendedTextMessage?.text
-            || msg.message.imageMessage?.caption
-            || '';
-
-        console.log("Received:", text);
-        if (!text.startsWith(prefix)) return;
-        if (msg.key.fromMe) return;
-
-        const [rawCmd, ...args] = text.slice(prefix.length).trim().split(/\s+/);
-        const cmd = rawCmd.toLowerCase();
-        console.log("Command:", cmd, "Args:", args);
-
-        try {
-            await delay(500);
-            if (cmd === 'ping') {
-                await EliteProTech.sendMessage(sender, { text: 'pong ✅', quoted: msg });
-            }
-            if (cmd === 'alive') {
-                await EliteProTech.sendMessage(sender, { text: 'Dom-X MD Bot is alive and running 🔥', quoted: msg });
-            }
-            if (cmd === 'menu') {
-                await EliteProTech.sendMessage(sender, {
-                    text: `*Dom-X MD Bot Menu*\n\n${prefix}ping → test bot response\n${prefix}alive → check if bot is running\n${prefix}session → get current session ID\n${prefix}menu → show this menu`,
-                    quoted: msg
-                });
-            }
-            if (cmd === 'session') {
-                const sess = getSessionId(botId);
-                await EliteProTech.sendMessage(sender, {
-                    text: sess ? JSON.stringify(JSON.parse(sess)) : 'No session found yet',
-                    quoted: msg
-                });
-            }
-        } catch (err) {
-            console.error("Command error:", err);
-        }
-    });
-
-    EliteProTech.ev.on("connection.update", async (s) => {
-        const { connection, lastDisconnect } = s;
-        console.log("Connection:", connection);
-
-        if (connection === "open") {
-            console.log("Bot connected as:", EliteProTech.user.id);
-        } else if (connection === "close" && lastDisconnect?.error?.output?.statusCode !== 401) {
-            console.log("Reconnecting...");
-            await delay(5000);
-            EliteProTech_PAIR_CODE();
-        }
-    });
-}
-
-// Export this so index.js can call it on boot
-module.exports.startBot = EliteProTech_PAIR_CODE;
-module.exports.qrRoute = router; // rename if you had qrRoute
-module.exports.pairRoute = router;
+module.exports = router;
