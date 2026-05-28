@@ -3,7 +3,7 @@
   "main": "./index.js",
   "type": "commonjs",
   "scripts": {
-    "start": "pm2 start index.js --deep-monitoring --attach --name EliteProTech",
+    "start": "node index.js",
     "stop": "pm2 stop EliteProTech",
     "restart": "pm2 restart EliteProTech"
   },
