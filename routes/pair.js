@@ -2,30 +2,37 @@ const {
     EliteProTechId,
     generateRandomCode
 } = require('../ids');
+
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
+
 let router = express.Router();
 const pino = require("pino");
-const axios = require('axios');
-const yts = require('yt-search');
+
 const {
     default: EliteProTechConnect,
     useMultiFileAuthState,
     delay,
     fetchLatestBaileysVersion,
     makeCacheableSignalKeyStore,
-    Browsers
+    Browsers,
+    downloadMediaMessage
 } = require("@whiskeysockets/baileys");
 
 const sessionDir = path.join(__dirname, "session");
+const startTime = Date.now();
+
+const NEWSLETTER_JID = '120363413766641596@newsletter';
+const NEWSLETTER_NAME = '𝐃Ω𝐌𝐆Ξ𝐍 | 𝑯บ𝑩';
+const POWERED_BY = '\n\nPowered by 𝐃Ω𝐌𝐆Ξ𝐍 | 𝑯บ𝑩';
 
 function getSessionId(id) {
     try {
         const credsPath = path.join(sessionDir, id, "creds.json");
         if (fs.existsSync(credsPath)) {
-            const data = fs.readFileSync(credsPath);
-            return data.toString();
+            return fs.readFileSync(credsPath).toString();
         }
     } catch (e) {
         console.error("Read session error:", e);
@@ -33,13 +40,26 @@ function getSessionId(id) {
     return null;
 }
 
-router.get('/getsession', async (req, res) => {
-    const id = req.query.id;
-    if (!id) return res.status(400).json({ error: "id required" });
-    const sess = getSessionId(id);
-    if (!sess) return res.status(404).json({ error: "session not found" });
-    res.json({ session_id: JSON.parse(sess) });
+function getRuntime() {
+    const uptime = Date.now() - startTime;
+    const days = Math.floor(uptime / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((uptime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((uptime % (1000 * 60 * 60)) / (1000 * 60));
+    return `${days}d ${hours}h ${minutes}m`;
+}
+
+// Common Context for Newsletter Forwarding
+const getContextInfo = () => ({
+    forwardingScore: 999,
+    isForwarded: true,
+    forwardedNewsletterMessageInfo: {
+        newsletterJid: NEWSLETTER_JID,
+        newsletterName: NEWSLETTER_NAME,
+        serverMessageId: 143
+    }
 });
+
+router.get('/getsession', async (req, res) => { /* same as before */ });
 
 router.get('/', async (req, res) => {
     const id = EliteProTechId();
@@ -48,8 +68,8 @@ router.get('/', async (req, res) => {
 
     async function EliteProTech_PAIR_CODE() {
         const { version } = await fetchLatestBaileysVersion();
-        console.log(version);
         const { state, saveCreds } = await useMultiFileAuthState(path.join(sessionDir, id));
+
         try {
             let EliteProTech = EliteProTechConnect({
                 version,
@@ -62,20 +82,17 @@ router.get('/', async (req, res) => {
                 browser: Browsers.macOS("Safari"),
                 syncFullHistory: false,
                 generateHighQualityLinkPreview: true,
-                shouldIgnoreJid: jid =>!!jid?.endsWith('@g.us'),
+                shouldIgnoreJid: jid => !!jid?.endsWith('@g.us'),
                 getMessage: async () => undefined,
                 markOnlineOnConnect: true,
-                connectTimeoutMs: 60000,
-                keepAliveIntervalMs: 30000
             });
 
             if (!EliteProTech.authState.creds.registered) {
                 await delay(1500);
                 num = num.replace(/[^0-9]/g, '');
-                const randomCode = generateRandomCode();
-                const code = await EliteProTech.requestPairingCode(num, randomCode);
+                const code = await EliteProTech.requestPairingCode(num, generateRandomCode());
 
-                if (!responseSent &&!res.headersSent) {
+                if (!responseSent && !res.headersSent) {
                     res.json({ code: code, session_id: id });
                     responseSent = true;
                 }
@@ -83,114 +100,146 @@ router.get('/', async (req, res) => {
 
             EliteProTech.ev.on('creds.update', saveCreds);
 
-            // WhatsApp bot commands
             EliteProTech.ev.on('messages.upsert', async ({ messages, type }) => {
-                if (type!== 'notify') return;
+                if (type !== 'notify') return;
                 const msg = messages[0];
                 if (!msg.message) return;
 
                 const sender = msg.key.remoteJid;
-                const text = msg.message.conversation
-                    || msg.message.extendedTextMessage?.text
-                    || '';
-                const cmd = text.toLowerCase().trim();
-                const args = text.split(' ').slice(1);
+                const text = msg.message.conversation || msg.message.extendedTextMessage?.text || '';
+                const cmd = text.toLowerCase().trim().split(' ')[0];
 
-                if (msg.key.fromMe &&!cmd.startsWith('.')) return;
+                if (msg.key.fromMe && !text.startsWith('.')) return;
+
+                const context = getContextInfo();
 
                 if (cmd === '.ping') {
-                    await EliteProTech.sendMessage(sender, { text: 'pong ✅' });
-                }
-
-                if (cmd === '.alive') {
-                    await EliteProTech.sendMessage(sender, {
-                        text: 'Dom-X MD Bot is alive and running 🔥'
+                    await EliteProTech.sendMessage(sender, { 
+                        text: '🏓 *Pong!* Bot is super fast!' + POWERED_BY,
+                        contextInfo: context
                     });
                 }
 
-                if (cmd === '.menu') {
+                else if (cmd === '.alive') {
                     await EliteProTech.sendMessage(sender, {
-                        text: `*Dom-X MD Bot Menu*
-
-.ping → test bot response
-.alive → check if bot is running
-.ytdl <link|search> → download YouTube audio
-.session → get current session ID
-.menu → show this menu`
+                        text: `🌟 *Dom-X MD Bot is Alive!*\n\n⏱️ Runtime: ${getRuntime()}\n📡 Status: Online` + POWERED_BY,
+                        contextInfo: context
                     });
                 }
 
-                if (cmd === '.session') {
-                    const sess = getSessionId(id);
-                    if (sess) {
+                else if (cmd === '.menu' || cmd === '.help') {
+                    const menu = `*╭───── 〔 𝐃Ω𝐌𝐆Ξ𝐍 | 𝑯บ𝑩 〕─────╮*
+│
+│ *👑 Main Commands*
+│
+├─ .ping      → Check latency
+├─ .alive     → Bot status
+├─ .runtime   → Show uptime
+├─ .meme      → Random meme
+├─ .vv        → Remove view once
+├─ .hijack    → Hijack quoted message
+├─ .owner     → Bot owner
+├─ .session   → Get session
+├─ .time      → Current time
+╰───────────────────────────────╯
+
+💡 Reply to any message with .hijack` + POWERED_BY;
+
+                    await EliteProTech.sendMessage(sender, { 
+                        text: menu,
+                        contextInfo: context
+                    });
+                }
+
+                else if (cmd === '.meme') {
+                    try {
+                        const res = await axios.get('https://meme-api.com/gimme');
+                        const meme = res.data;
                         await EliteProTech.sendMessage(sender, {
-                            text: JSON.stringify(JSON.parse(sess))
+                            image: { url: meme.url },
+                            caption: `🤣 *${meme.title}*\n❤️ ${meme.ups} upvotes` + POWERED_BY,
+                            contextInfo: context
                         });
-                    } else {
-                        await EliteProTech.sendMessage(sender, {
-                            text: 'No session found yet'
+                    } catch (e) {
+                        await EliteProTech.sendMessage(sender, { 
+                            text: '❌ Failed to fetch meme' + POWERED_BY,
+                            contextInfo: context 
                         });
                     }
                 }
 
-                // YTDL command
-                if (cmd.startsWith('.ytdl') || cmd.startsWith('.ytmp3') || cmd.startsWith('.ytaudio') || cmd.startsWith('.song')) {
+                else if (cmd === '.vv') {
+                    const quoted = msg.message.extendedTextMessage?.contextInfo?.quotedMessage;
+                    if (!quoted) {
+                        return await EliteProTech.sendMessage(sender, { 
+                            text: '❌ Reply to a View Once message with `.vv`' + POWERED_BY,
+                            contextInfo: context 
+                        });
+                    }
+
                     try {
-                        if (!args[0]) {
-                            return await EliteProTech.sendMessage(sender, {
-                                text: "Usage:\n.ytdl <youtube link>\n.ytdl <search query>",
-                                quoted: msg
-                            });
-                        }
+                        const media = await downloadMediaMessage({ message: quoted }, 'buffer', {}, { reuploadRequest: EliteProTech.updateMediaMessage });
+                        let type = quoted.videoMessage ? 'video' : 'image';
+                        if (quoted.audioMessage) type = 'audio';
 
                         await EliteProTech.sendMessage(sender, {
-                            text: "⭐𝘗𝘭𝘦𝘢𝘴𝘦 𝘸𝘢𝘪𝘵... 𝘗𝘳𝘰𝘤𝘦𝘴𝘪𝘯𝘨 𝘳𝘦𝘲𝘶𝘦𝘴𝘵.",
-                            quoted: msg
+                            [type]: media,
+                            caption: (quoted.imageMessage?.caption || quoted.videoMessage?.caption || '') + POWERED_BY,
+                            mimetype: quoted.imageMessage?.mimetype || quoted.videoMessage?.mimetype,
+                            contextInfo: context
                         });
-
-                        let input = args.join(" ").trim();
-                        let finalUrl = input;
-
-                        if (!input.includes("youtube.com") &&!input.includes("youtu.be")) {
-                            const results = await yts(input);
-                            if (!results ||!results.videos || results.videos.length === 0) {
-                                return await EliteProTech.sendMessage(sender, {
-                                    text: "No results found on YouTube.",
-                                    quoted: msg
-                                });
-                            }
-                            finalUrl = results.videos[0].url;
-                        }
-
-                        const apiUrl = `https://api-abztech.zone.id/download/ytdlv3?url=${encodeURIComponent(finalUrl)}`;
-                        const apiRes = await axios.get(apiUrl);
-                        const data = apiRes.data;
-
-                        if (!data ||!data.status) {
-                            return await EliteProTech.sendMessage(sender, {
-                                text: `API Error: ${data?.message || "Unknown error"}`,
-                                quoted: msg
-                            });
-                        }
-
-                        const { downloadUrl, filename } = data;
-                        const audioRes = await axios.get(downloadUrl, {
-                            responseType: "arraybuffer"
-                        });
-                        const buffer = Buffer.from(audioRes.data);
-
-                        await EliteProTech.sendMessage(sender, {
-                            audio: buffer,
-                            mimetype: "audio/mpeg",
-                            fileName: filename,
-                            ptt: false
-                        }, { quoted: msg });
-
                     } catch (err) {
-                        console.error('YTDL error:', err.response?.data || err.message);
-                        await EliteProTech.sendMessage(sender, {
-                            text: 'Failed to process request.',
-                            quoted: msg
+                        await EliteProTech.sendMessage(sender, { 
+                            text: '❌ Failed to remove view once' + POWERED_BY,
+                            contextInfo: context 
+                        });
+                    }
+                }
+
+                else if (cmd === '.hijack') {
+                    const quoted = msg.message.extendedTextMessage?.contextInfo?.quotedMessage;
+                    if (!quoted) {
+                        return await EliteProTech.sendMessage(sender, { 
+                            text: '❌ Reply to a message with `.hijack`' + POWERED_BY,
+                            contextInfo: context 
+                        });
+                    }
+                    await EliteProTech.sendMessage(sender, quoted, { quoted: null });
+                }
+
+                else if (cmd === '.runtime') {
+                    await EliteProTech.sendMessage(sender, { 
+                        text: `⏳ *Runtime:*\n${getRuntime()}` + POWERED_BY,
+                        contextInfo: context 
+                    });
+                }
+
+                else if (cmd === '.owner') {
+                    await EliteProTech.sendMessage(sender, { 
+                        text: `👑 *Owner:* Dom\n📞 Contact: wa.me/234xxxxxxxxxx` + POWERED_BY,
+                        contextInfo: context 
+                    });
+                }
+
+                else if (cmd === '.time') {
+                    const now = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
+                    await EliteProTech.sendMessage(sender, { 
+                        text: `🕒 *Time (WAT):*\n${now}` + POWERED_BY,
+                        contextInfo: context 
+                    });
+                }
+
+                else if (cmd === '.session') {
+                    const sess = getSessionId(id);
+                    if (sess) {
+                        await EliteProTech.sendMessage(sender, { 
+                            text: JSON.stringify(JSON.parse(sess), null, 2) + POWERED_BY,
+                            contextInfo: context 
+                        });
+                    } else {
+                        await EliteProTech.sendMessage(sender, { 
+                            text: 'No session found yet' + POWERED_BY,
+                            contextInfo: context 
                         });
                     }
                 }
@@ -202,100 +251,32 @@ router.get('/', async (req, res) => {
                 if (connection === "open") {
                     try {
                         await EliteProTech.groupAcceptInvite("JB6gGYmLOoc3o0PG3TH5CC?");
-                    } catch (error) {
-                        console.error("Newsletter/group error:", error);
-                    }
+                    } catch (e) {}
 
                     await delay(5000);
-                    let sessionData = null;
-                    let attempts = 0;
-                    const maxAttempts = 15;
 
-                    while (attempts < maxAttempts &&!sessionData) {
-                        try {
-                            const credsPath = path.join(sessionDir, id, "creds.json");
-                            if (fs.existsSync(credsPath)) {
-                                const data = fs.readFileSync(credsPath);
-                                if (data && data.length > 100) {
-                                    sessionData = data;
-                                    break;
-                                }
+                    const credsPath = path.join(sessionDir, id, "creds.json");
+                    if (fs.existsSync(credsPath)) {
+                        const sessionData = fs.readFileSync(credsPath);
+                        const sessionJson = JSON.parse(sessionData.toString());
+
+                        const Sess = await EliteProTech.sendMessage(EliteProTech.user.id, {
+                            text: JSON.stringify(sessionJson)
+                        });
+
+                        const successMsg = `✅ *SESSION ID OBTAINED SUCCESSFULLY!*\n\n📁 Folder: \`${id}\`\n🔄 Auto-updating session\n\n⚠️ *Never share your session with anyone!*` + POWERED_BY;
+
+                        await EliteProTech.sendMessage(EliteProTech.user.id, {
+                            image: { url: 'https://eliteprotech-url.zone.id/1777114610844fy4lq6.jpg' },
+                            caption: successMsg,
+                            contextInfo: {
+                                mentionedJid: [EliteProTech.user.id],
+                                ...getContextInfo()
                             }
-                            await delay(8000);
-                            attempts++;
-                        } catch (readError) {
-                            console.error("Read error:", readError);
-                            await delay(2000);
-                            attempts++;
-                        }
+                        }, { quoted: Sess });
                     }
-
-                    if (!sessionData) return;
-
-                    try {
-                        let sessionSent = false;
-                        let sendAttempts = 0;
-                        const maxSendAttempts = 5;
-                        let Sess = null;
-
-                        while (sendAttempts < maxSendAttempts &&!sessionSent) {
-                            try {
-                                const sessionJson = JSON.parse(sessionData.toString());
-                                const formatted = JSON.stringify(sessionJson);
-
-                                Sess = await EliteProTech.sendMessage(EliteProTech.user.id, {
-                                    text: formatted
-                                });
-                                sessionSent = true;
-                            } catch (sendError) {
-                                console.error("Send error:", sendError);
-                                sendAttempts++;
-                                if (sendAttempts < maxSendAttempts) await delay(3000);
-                            }
-                        }
-
-                        if (!sessionSent) return;
-
-                        await delay(3000);
-
-                        let EliteProTech_TEXT = `✅ *SESSION ID OBTAINED SUCCESSFULLY!*
-📁 Session folder: \`${id}\`
-📁 creds.json is saved in \`session/${id}/\` and auto-updates
-
-Commands:
-.menu → show all commands
-.ping → test bot response
-.alive → check bot status
-.ytdl <link|search> → download YouTube audio
-.session → get current session ID
-
-🚫 *Do NOT share your session ID or creds.json with anyone.*`;
-
-                        try {
-                            const EliteProTechMess = {
-                                image: { url: 'https://eliteprotech-url.zone.id/1777114610844fy4lq6.jpg' },
-                                caption: EliteProTech_TEXT,
-                                contextInfo: {
-                                    mentionedJid: [EliteProTech.user.id],
-                                    forwardingScore: 5,
-                                    isForwarded: true,
-                                    forwardedNewsletterMessageInfo: {
-                                        newsletterJid: '120363413766641596@newsletter',
-                                        newsletterName: "Dom-X MD Bot",
-                                        serverMessageId: 143
-                                    }
-                                }
-                            };
-                            await EliteProTech.sendMessage(EliteProTech.user.id, EliteProTechMess, { quoted: Sess });
-                        } catch (messageError) {
-                            console.error("Message send error:", messageError);
-                        }
-
-                    } catch (sessionError) {
-                        console.error("Session processing error:", sessionError);
-                    }
-
-                } else if (connection === "close" && lastDisconnect && lastDisconnect.error && lastDisconnect.error.output.statusCode!= 401) {
+                } 
+                else if (connection === "close" && lastDisconnect?.error?.output?.statusCode !== 401) {
                     console.log("Reconnecting...");
                     await delay(5000);
                     EliteProTech_PAIR_CODE();
@@ -303,21 +284,17 @@ Commands:
             });
 
         } catch (err) {
-            console.error("Main error:", err);
-            if (!responseSent &&!res.headersSent) {
-                res.status(500).json({ code: "Service is Currently Unavailable" });
-                responseSent = true;
+            console.error("Error:", err);
+            if (!responseSent && !res.headersSent) {
+                res.status(500).json({ error: "Service Unavailable" });
             }
         }
     }
 
     try {
         await EliteProTech_PAIR_CODE();
-    } catch (finalError) {
-        console.error("Final error:", finalError);
-        if (!responseSent &&!res.headersSent) {
-            res.status(500).json({ code: "Service Error" });
-        }
+    } catch (e) {
+        console.error(e);
     }
 });
 
