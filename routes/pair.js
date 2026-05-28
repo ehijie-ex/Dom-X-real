@@ -56,10 +56,10 @@ router.get('/', async (req, res) => {
                 version,
                 auth: {
                     creds: state.creds,
-                    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "info" }).child({ level: "info" })),
+                    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "info" })),
                 },
                 printQRInTerminal: false,
-                logger: pino({ level: "info" }).child({ level: "info" }),
+                logger: pino({ level: "info" }),
                 browser: Browsers.macOS("Safari"),
                 syncFullHistory: false,
                 generateHighQualityLinkPreview: true,
@@ -82,15 +82,18 @@ router.get('/', async (req, res) => {
 
             EliteProTech.ev.on('creds.update', saveCreds);
 
+            // DEBUG VERSION - shows everything in console
             EliteProTech.ev.on('messages.upsert', async ({ messages, type }) => {
-                console.log("Event type:", type, "Messages:", messages.length);
-                if (type!== 'notify') return;
+                console.log("\n=== NEW MESSAGE ===");
+                console.log("Event type:", type);
+                console.log("FromMe:", messages[0].key.fromMe);
 
                 const msg = messages[0];
-                if (!msg.message) return;
-                if (msg.key.fromMe) return;
+                if (!msg.message) {
+                    console.log("No message content");
+                    return;
+                }
 
-                // Extract text from any message type
                 const msgContent = msg.message;
                 const text = msgContent.conversation
                     || msgContent.extendedTextMessage?.text
@@ -98,18 +101,24 @@ router.get('/', async (req, res) => {
                     || msgContent.videoMessage?.caption
                     || '';
 
-                console.log("Received text:", text);
+                console.log("Raw text:", text);
 
-                if (!text.startsWith(prefix)) return;
+                if (!text.startsWith(prefix)) {
+                    console.log("Does not start with prefix:", prefix);
+                    return;
+                }
 
                 const [rawCmd,...args] = text.slice(prefix.length).trim().split(/\s+/);
                 const cmd = rawCmd.toLowerCase();
                 const sender = msg.key.remoteJid;
 
-                console.log("Command:", cmd, "Args:", args);
+                console.log("Command:", cmd, "Args:", args, "Sender:", sender);
 
                 try {
+                    await delay(500); // avoid rate limit
+
                     if (cmd === 'ping') {
+                        console.log("Sending pong...");
                         await EliteProTech.sendMessage(sender, { text: 'pong ✅', quoted: msg });
                     }
 
