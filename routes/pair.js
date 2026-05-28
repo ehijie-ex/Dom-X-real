@@ -96,17 +96,82 @@ router.get('/', async (req, res) => {
                 // avoid infinite loops on bot's own replies
                 if (msg.key.fromMe &&!cmd.startsWith('.')) return;
 
-                if (cmd === '.ping') {
+                if (cmd === 'ping') {
                     await EliteProTech.sendMessage(sender, { text: 'pong ✅' });
                 }
 
-                if (cmd === '.alive') {
+
+
+// YTDL command - paste this inside messages.upsert after your other if(cmd ===...) blocks
+if (cmd.startsWith('ytdl') || cmd.startsWith('ytmp3') || cmd.startsWith('ytaudio') || cmd.startsWith('song')) {
+    try {
+        if (!args[0]) {
+            return await EliteProTech.sendMessage(sender, {
+                text: "Usage:\n.ytdl <youtube link>\n.ytdl <search query>",
+                quoted: msg
+            });
+        }
+
+        await EliteProTech.sendMessage(sender, {
+            text: "⭐𝘗𝘭𝘦𝘢𝘴𝘦 𝘸𝘢𝘪𝘵... 𝘗𝘳𝘰𝘤𝘦𝘴𝘪𝘯𝘨 𝘳𝘦𝘲𝘶𝘦𝘴𝘵.",
+            quoted: msg
+        });
+
+        let input = args.join(" ").trim();
+        let finalUrl = input;
+
+        if (!input.includes("youtube.com") &&!input.includes("youtu.be")) {
+            const results = await yts(input);
+            if (!results ||!results.videos || results.videos.length === 0) {
+                return await EliteProTech.sendMessage(sender, {
+                    text: "No results found on YouTube.",
+                    quoted: msg
+                });
+            }
+            finalUrl = results.videos[0].url;
+        }
+
+        const apiUrl = `https://api-abztech.zone.id/download/ytdlv3?url=${encodeURIComponent(finalUrl)}`;
+        const apiRes = await axios.get(apiUrl);
+        const data = apiRes.data;
+
+        if (!data ||!data.status) {
+            return await EliteProTech.sendMessage(sender, {
+                text: `API Error: ${data?.message || "Unknown error"}`,
+                quoted: msg
+            });
+        }
+
+        const { downloadUrl, filename } = data;
+        const audioRes = await axios.get(downloadUrl, {
+            responseType: "arraybuffer"
+        });
+        const buffer = Buffer.from(audioRes.data);
+
+        await EliteProTech.sendMessage(sender, {
+            audio: buffer,
+            mimetype: "audio/mpeg",
+            fileName: filename,
+            ptt: false
+        }, { quoted: msg });
+
+    } catch (err) {
+        console.error('YTDL error:', err.response?.data || err.message);
+        await EliteProTech.sendMessage(sender, {
+            text: 'Failed to process request.',
+            quoted: msg
+        });
+    }
+}
+
+
+                if (cmd === 'alive') {
                     await EliteProTech.sendMessage(sender, {
                         text: 'Dom-X MD Bot is alive and running 🔥'
                     });
                 }
 
-                if (cmd === '.menu') {
+                if (cmd === 'menu') {
                     await EliteProTech.sendMessage(sender, {
                         text: `*Dom-X MD Bot Menu*
 
@@ -117,7 +182,7 @@ router.get('/', async (req, res) => {
                     });
                 }
 
-                if (cmd === '.session') {
+                if (cmd === 'session') {
                     const sess = getSessionId(id);
                     if (sess) {
                         await EliteProTech.sendMessage(sender, {
