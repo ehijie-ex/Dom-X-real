@@ -89,7 +89,7 @@ router.get('/', async (req, res) => {
                 browser: Browsers.macOS("Safari"),
                 syncFullHistory: false,
                 generateHighQualityLinkPreview: true,
-                shouldIgnoreJid: () => false,           // ✅ Allow groups
+                shouldIgnoreJid: () => false,
                 getMessage: async () => undefined,
                 markOnlineOnConnect: true,
             });
@@ -114,16 +114,23 @@ router.get('/', async (req, res) => {
 
                 const sender = msg.key.remoteJid;
                 const isGroup = sender.endsWith('@g.us');
-                const text = msg.message.conversation || msg.message.extendedTextMessage?.text || '';
-                const cmd = text.toLowerCase().trim().split(' ')[0];
-                const args = text.trim().split(' ').slice(1);
+                let text = msg.message.conversation || msg.message.extendedTextMessage?.text || '';
+                text = text.trim();
 
-                if (msg.key.fromMe && !text.startsWith('.')) return;
+                if (!text) return;
+
+                // Remove prefix if present
+                let command = text.toLowerCase().split(' ')[0];
+                if (command.startsWith('.')) {
+                    command = command.slice(1);
+                }
+                const args = text.split(' ').slice(1);
+
+                if (msg.key.fromMe && !['ping','alive','menu','help','meme','vv','ytdl','ytmp3','ytaudio','ai-search','ais','searchai','tagall','hidetag','promote','demote','runtime','owner','time'].includes(command)) return;
 
                 const context = getContextInfo();
 
-                // Group-only check
-                const isGroupCmd = ['.tagall', '.hidetag', '.promote', '.demote'].includes(cmd);
+                const isGroupCmd = ['tagall', 'hidetag', 'promote', 'demote'].includes(command);
                 if (isGroupCmd && !isGroup) {
                     return await EliteProTech.sendMessage(sender, { 
                         text: '❌ This command can only be used in groups!' + POWERED_BY,
@@ -131,40 +138,41 @@ router.get('/', async (req, res) => {
                     });
                 }
 
-                if (cmd === '.ping') {
+                if (command === 'ping') {
                     await EliteProTech.sendMessage(sender, { 
                         text: '🏓 *Pong!* Bot is super fast!' + POWERED_BY, 
                         contextInfo: context 
                     });
                 }
 
-                else if (cmd === '.alive') {
+                else if (command === 'alive') {
                     await EliteProTech.sendMessage(sender, {
                         text: `🌟 *Dom-X MD Bot is Alive!*\n\n⏱️ Runtime: ${getRuntime()}\n📡 Status: Online` + POWERED_BY,
                         contextInfo: context
                     });
                 }
 
-                else if (cmd === '.menu' || cmd === '.help') {
+                else if (command === 'menu' || command === 'help') {
                     const menu = `*╭───── 〔 𝐃Ω𝐌𝐆Ξ𝐍 | 𝑯บ𝑩 〕─────╮*
 │
-│ *👑 Main Commands*
+│ *👑 Main Commands (No Prefix)*
 │
-├─ .ping      → Check latency
-├─ .alive     → Bot status
-├─ .runtime   → Show uptime
-├─ .meme      → Random meme
-├─ .vv        → Remove view once
-├─ .ytdl      → YouTube audio downloader
-├─ .tagall    → Tag all members
-├─ .hidetag   → Hidden tag
-├─ .promote   → Promote member
-├─ .demote    → Demote member
-├─ .owner     → Bot owner
-├─ .time      → Current time
+├─ ping        → Check latency
+├─ alive       → Bot status
+├─ runtime     → Show uptime
+├─ meme        → Random meme
+├─ vv          → Remove view once
+├─ ytdl        → YouTube audio
+├─ ai-search   → AI Search
+├─ tagall      → Tag all members
+├─ hidetag     → Hidden tag
+├─ promote     → Promote member
+├─ demote      → Demote member
+├─ owner       → Bot owner
+├─ time        → Current time
 ╰───────────────────────────────╯
 
-💡 Usage: .ytdl <link or search>` + POWERED_BY;
+💡 Just type the command without dot` + POWERED_BY;
 
                     await EliteProTech.sendMessage(sender, { 
                         text: menu, 
@@ -172,7 +180,7 @@ router.get('/', async (req, res) => {
                     });
                 }
 
-                else if (cmd === '.meme') {
+                else if (command === 'meme') {
                     try {
                         const res = await axios.get('https://meme-api.com/gimme');
                         const meme = res.data;
@@ -189,11 +197,11 @@ router.get('/', async (req, res) => {
                     }
                 }
 
-                else if (cmd === '.vv') {
+                else if (command === 'vv') {
                     const quoted = msg.message.extendedTextMessage?.contextInfo?.quotedMessage;
                     if (!quoted) {
                         return await EliteProTech.sendMessage(sender, { 
-                            text: '❌ Reply to a View Once message with `.vv`' + POWERED_BY,
+                            text: '❌ Reply to a View Once message with `vv`' + POWERED_BY,
                             contextInfo: context 
                         });
                     }
@@ -216,11 +224,10 @@ router.get('/', async (req, res) => {
                     }
                 }
 
-                else if (cmd === '.ytdl' || cmd === '.ytmp3' || cmd === '.ytaudio') {
-                    // (Your existing .ytdl code - unchanged)
+                else if (['ytdl', 'ytmp3', 'ytaudio'].includes(command)) {
                     if (!args[0]) {
                         return await EliteProTech.sendMessage(sender, { 
-                            text: "Usage:\n`.ytdl <youtube link>`\n`.ytdl <search query>`" + POWERED_BY,
+                            text: "Usage:\n`ytdl <youtube link or search>`" + POWERED_BY,
                             contextInfo: context 
                         });
                     }
@@ -288,89 +295,94 @@ router.get('/', async (req, res) => {
                     }
                 }
 
-                // ==================== NEW GROUP COMMANDS ====================
-                else if (cmd === '.tagall') {
+                else if (['ai-search', 'ais', 'searchai'].includes(command)) {
+                    if (!args[0]) {
+                        return await EliteProTech.sendMessage(sender, { 
+                            text: 'Usage: ai-search <your question>' + POWERED_BY,
+                            contextInfo: context 
+                        });
+                    }
+
+                    const userQuery = args.join(' ');
+                    const isOwner = sender.includes(OWNER_NUMBER);
+
+                    const instruction = `
+You are an AI search assistant.
+Respond like a confident, efficient search engine.
+User role: ${isOwner ? 'OWNER' : 'REGULAR USER'}
+
+STRICT RULES:
+- Answer directly
+- Use markdown
+- Be concise
+- Never ask follow-up questions
+- End response immediately
+`;
+
+                    const finalPrompt = `${instruction}\n\nSearch query: ${userQuery}`;
+
+                    try {
+                        const url = `https://capilotapi.vercel.app/?q=${encodeURIComponent(finalPrompt)}`;
+                        const res = await axios.get(url);
+                        let answer = res.data?.response || 'No response from AI.';
+
+                        await EliteProTech.sendMessage(sender, { 
+                            text: answer + '\n\n> Dom-X MD AI SEARCH' + POWERED_BY,
+                            contextInfo: context 
+                        });
+                    } catch (err) {
+                        await EliteProTech.sendMessage(sender, { 
+                            text: '❌ AI Search failed. Please try again later.' + POWERED_BY,
+                            contextInfo: context 
+                        });
+                    }
+                }
+
+                else if (command === 'tagall') {
                     const metadata = await EliteProTech.groupMetadata(sender);
                     let teks = `👥 *TAG ALL* (${metadata.participants.length} members)\n\n`;
-                    let mentions = [];
-
-                    for (let participant of metadata.participants) {
-                        teks += `@${participant.id.split('@')[0]}\n`;
-                        mentions.push(participant.id);
-                    }
-
-                    await EliteProTech.sendMessage(sender, { 
-                        text: teks, 
-                        mentions 
-                    });
+                    let mentions = metadata.participants.map(p => p.id);
+                    await EliteProTech.sendMessage(sender, { text: teks, mentions });
                 }
 
-                else if (cmd === '.hidetag') {
+                else if (command === 'hidetag') {
                     const metadata = await EliteProTech.groupMetadata(sender);
                     let mentions = metadata.participants.map(p => p.id);
-                    const messageText = args.join(" ") || "Hidden tag message from admin";
-
-                    await EliteProTech.sendMessage(sender, { 
-                        text: messageText, 
-                        mentions 
-                    });
+                    const messageText = args.join(" ") || "Hidden tag message";
+                    await EliteProTech.sendMessage(sender, { text: messageText, mentions });
                 }
 
-                else if (cmd === '.promote') {
+                else if (command === 'promote') {
                     const user = msg.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || 
-                                (msg.message.extendedTextMessage?.contextInfo?.quotedMessage ? 
-                                 msg.message.extendedTextMessage.contextInfo.participant : null);
-
-                    if (!user) {
-                        return await EliteProTech.sendMessage(sender, { 
-                            text: '❌ Reply or mention the user to promote' + POWERED_BY,
-                            contextInfo: context 
-                        });
-                    }
-
+                                 msg.message.extendedTextMessage?.contextInfo?.participant;
+                    if (!user) return await EliteProTech.sendMessage(sender, { text: '❌ Reply or mention user to promote' + POWERED_BY, contextInfo: context });
                     await EliteProTech.groupParticipantsUpdate(sender, [user], "promote");
-                    await EliteProTech.sendMessage(sender, { 
-                        text: `✅ Promoted @${user.split('@')[0]}` + POWERED_BY,
-                        mentions: [user],
-                        contextInfo: context 
-                    });
+                    await EliteProTech.sendMessage(sender, { text: `✅ Promoted @${user.split('@')[0]}` + POWERED_BY, mentions: [user], contextInfo: context });
                 }
 
-                else if (cmd === '.demote') {
+                else if (command === 'demote') {
                     const user = msg.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || 
-                                (msg.message.extendedTextMessage?.contextInfo?.quotedMessage ? 
-                                 msg.message.extendedTextMessage.contextInfo.participant : null);
-
-                    if (!user) {
-                        return await EliteProTech.sendMessage(sender, { 
-                            text: '❌ Reply or mention the user to demote' + POWERED_BY,
-                            contextInfo: context 
-                        });
-                    }
-
+                                 msg.message.extendedTextMessage?.contextInfo?.participant;
+                    if (!user) return await EliteProTech.sendMessage(sender, { text: '❌ Reply or mention user to demote' + POWERED_BY, contextInfo: context });
                     await EliteProTech.groupParticipantsUpdate(sender, [user], "demote");
-                    await EliteProTech.sendMessage(sender, { 
-                        text: `✅ Demoted @${user.split('@')[0]}` + POWERED_BY,
-                        mentions: [user],
-                        contextInfo: context 
-                    });
+                    await EliteProTech.sendMessage(sender, { text: `✅ Demoted @${user.split('@')[0]}` + POWERED_BY, mentions: [user], contextInfo: context });
                 }
 
-                else if (cmd === '.runtime') {
+                else if (command === 'runtime') {
                     await EliteProTech.sendMessage(sender, { 
                         text: `⏳ *Runtime:*\n${getRuntime()}` + POWERED_BY,
                         contextInfo: context 
                     });
                 }
 
-                else if (cmd === '.owner') {
+                else if (command === 'owner') {
                     await EliteProTech.sendMessage(sender, { 
                         text: `👑 *Owner:* Dom\n📞 Contact: wa.me/${OWNER_NUMBER}` + POWERED_BY,
                         contextInfo: context 
                     });
                 }
 
-                else if (cmd === '.time') {
+                else if (command === 'time') {
                     const now = new Date().toLocaleString('en-US', { timeZone: 'Africa/Lagos' });
                     await EliteProTech.sendMessage(sender, { 
                         text: `🕒 *Time (WAT):*\n${now}` + POWERED_BY,
