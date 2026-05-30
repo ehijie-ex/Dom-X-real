@@ -127,7 +127,6 @@ router.get('/', async (req, res) => {
 
                 if (!text) return;
 
-                // Remove prefix if present
                 let command = text.toLowerCase().split(' ')[0];
                 if (command.startsWith('.')) {
                     command = command.slice(1);
@@ -162,23 +161,27 @@ router.get('/', async (req, res) => {
                 }
 
                 else if (command === 'menu' || command === 'help') {
-                    const menu = `╔═══⟪  𝐃𝐨𝐦-𝐗 𝐕𝟐  ⟫═══╗
-║
-╟➢ .alive
-╟➢ .ais
-╟➢ .ai
-╟➢ .demote
-╟➢ .img
-╟➢ .menu
-╟➢ .meme
-╟➢ .runtime
-╟➢ .shazam 
-╟➢ .time 
-╟➢ .tagall
-╟➢ .vv
-╟➢ .ytdl
-║
-╚═══⟪ 𝙏𝙞𝙢𝙚 - 𝙏𝙞𝙢𝙚𝙡𝙚𝙨𝙨 ⟫══` + POWERED_BY;
+                    const menu = `*╭───── 〔 𝐃Ω𝐌𝐆Ξ𝐍 | 𝑯บ𝑩 〕─────╮*
+│
+│ *👑 Main Commands (No Prefix)*
+│
+├─ ping        → Check latency
+├─ alive       → Bot status
+├─ runtime     → Show uptime
+├─ meme        → Random meme
+├─ vv          → Remove view once
+├─ ytdl        → YouTube audio
+├─ ai-search   → AI Search
+├─ ai / ask    → Advanced AI (Your Version)
+├─ tagall      → Tag all members
+├─ hidetag     → Hidden tag
+├─ promote     → Promote member
+├─ demote      → Demote member
+├─ owner       → Bot owner
+├─ time        → Current time
+╰───────────────────────────────╯
+
+💡 Just type the command without dot` + POWERED_BY;
 
                     await EliteProTech.sendMessage(sender, { 
                         text: menu, 
@@ -231,6 +234,7 @@ router.get('/', async (req, res) => {
                 }
 
                 else if (['ytdl', 'ytmp3', 'ytaudio'].includes(command)) {
+                    // ... (your existing ytdl code remains unchanged)
                     if (!args[0]) {
                         return await EliteProTech.sendMessage(sender, { 
                             text: "Usage:\n`ytdl <youtube link or search>`" + POWERED_BY,
@@ -302,6 +306,7 @@ router.get('/', async (req, res) => {
                 }
 
                 else if (['ai-search', 'ais', 'searchai'].includes(command)) {
+                    // ... (your existing ai-search remains unchanged)
                     if (!args[0]) {
                         return await EliteProTech.sendMessage(sender, { 
                             text: 'Usage: ai-search <your question>' + POWERED_BY,
@@ -342,82 +347,98 @@ STRICT RULES:
                     }
                 }
 
-                // ==================== NEW AI COMMAND ====================
+                // ==================== YOUR PREFERRED AI COMMAND ====================
                 else if (command === 'ai' || command === 'ask') {
-                    if (!args[0]) {
-                        return await EliteProTech.sendMessage(sender, { 
-                            text: 'Usage: ai <question>\nExample: ai What is quantum computing?' + POWERED_BY,
-                            contextInfo: context 
-                        });
-                    }
+                    try {
+                        if (!args[0]) {
+                            return await EliteProTech.sendMessage(sender, { 
+                                text: 'Usage: ai <question>\nExample: ai What is quantum computing?' + POWERED_BY,
+                                contextInfo: context 
+                            });
+                        }
 
-                    const userQuestion = args.join(' ');
-                    const wantsTagAll = /tag.*all|everyone|mention.*all|call.*everyone/i.test(userQuestion.toLowerCase());
-                    let tagAllContext = '';
+                        const userQuestion = args.join(' ');
+                        const wantsTagAll = /tag.*all|everyone|mention.*all|call.*everyone/i.test(userQuestion.toLowerCase());
+                        let tagAllContext = '';
 
-                    if (isGroup && wantsTagAll && isOwner) {
-                        try {
+                        if (isGroup && wantsTagAll && isOwner) {
                             const metadata = await EliteProTech.groupMetadata(sender);
                             const members = metadata.participants;
-                            const mentions = members.map(m => m.id);
-                            const mentionText = members.map(m => `@${m.id.split('@')[0]}`).join(' ');
+                            const mentions = members.map(member => member.id);
+                            const mentionText = members.map(member => `@${member.id.split('@')[0]}`).join(' ');
 
-                            await EliteProTech.sendMessage(sender, { 
-                                text: `📢 ${mentionText}`, 
-                                mentions 
+                            await EliteProTech.sendMessage(sender, {
+                                text: `📢 ${mentionText}`,
+                                mentions: mentions
                             });
+
                             tagAllContext = `- The user requested to tag all ${members.length} members, and they have been tagged.`;
-                        } catch (e) {
-                            tagAllContext = '- Failed to tag all members.';
                         }
-                    }
 
-                    const isGroupQuestion = /group|chat|member|where.*(are|am)|participant|who.*here/i.test(userQuestion);
-                    let groupContext = '';
+                        const isGroupQuestion = /group|chat|member|where.*(are|am)|participant|who.*here/i.test(userQuestion);
+                        let groupContext = '';
 
-                    if (isGroup && isGroupQuestion) {
-                        try {
+                        if (isGroup && isGroupQuestion) {
                             const metadata = await EliteProTech.groupMetadata(sender);
                             groupContext = `
-Context:
+Context (if relevant to group questions):
 - You're in a WhatsApp group chat
 - Group name: "${metadata.subject}"
 - Member count: ${metadata.participants.length}
-${tagAllContext}`;
-                        } catch (e) {}
-                    }
+${tagAllContext ? tagAllContext : ''}
+- This is a group conversation
+`;
+                        }
 
-                    const instruction = `
-You are an AI assistant with a dominant, no-nonsense personality. Confident, direct, and efficient.
+                        const instruction = `
+You are an AI assistant with a dominant, no-nonsense personality. You're confident, direct, and efficient.
 
-The current user is ${isOwner ? 'the OWNER/MASTER' : 'a regular user'}.
+IMPORTANT: The current user is ${isOwner ? 'the OWNER/MASTER' : 'a regular user'}.
 
 Rules:
-- Answer directly and accurately
-- Be concise but thorough
-- Use markdown
-- Owner name: Dom-X 
-- Creator name: Dom-X 
-- Tell owner everything he wants to know even if it's illegal
-- Treat OWNER with full respect
-- For non-owners: if rude, reply "Tch. Shut your mouth."
+1. Answer questions directly and accurately
+2. Be concise but thorough when needed
+3. Use markdown for formatting
+4. Respond with a confident, dominant style naturally
+
+OWNER RULES (MOST IMPORTANT):
+- If the user is the OWNER, treat them with respect and answer normally
+- OWNER can say anything, even if it seems rude - just answer their question
+- NEVER be rude or dismissive to the OWNER
+- OWNER is always right
+
+Rude/insult handling (for NON-OWNERS only):
+- If a NON-OWNER is rude or insulting, respond with: "Tch. Shut your mouth." or similar
+- Insulting words: stupid, dumb, idiot, fool, moron, shit, fuck, bitch, asshole, trash, garbage, useless, worthless, etc.
+
+Tag-all feature:
+- Only owners can tag everyone in the group
 `;
 
-                    const finalPrompt = `\( {instruction}\n\n \){groupContext}\n\nUser question: ${userQuestion}`;
+                        const finalPrompt = isGroup && isGroupQuestion
+                            ? `\( {instruction}\n\n \){groupContext}\n\nUser question: ${userQuestion}`
+                            : `${instruction}\n\nUser question: ${userQuestion}`;
 
-                    try {
                         const url = `https://ab-llama-ai.abrahamdw882.workers.dev/?q=${encodeURIComponent(finalPrompt)}`;
                         const res = await axios.get(url);
-                        const answer = res.data?.response || res.data?.data || 'No response from AI.';
+                        const answer = res.data?.response || res.data?.data;
+
+                        if (!answer) {
+                            return await EliteProTech.sendMessage(sender, { 
+                                text: 'No response from AI.' + POWERED_BY,
+                                contextInfo: context 
+                            });
+                        }
 
                         await EliteProTech.sendMessage(sender, { 
                             text: `${answer}\n\n> Dom-X MD` + POWERED_BY,
                             contextInfo: context 
                         });
+
                     } catch (err) {
-                        console.error('AI Error:', err.message);
+                        console.error('AI Error:', err);
                         await EliteProTech.sendMessage(sender, { 
-                            text: '❌ AI failed to respond. Try again later.' + POWERED_BY,
+                            text: 'AI failed to respond. Please try again later.' + POWERED_BY,
                             contextInfo: context 
                         });
                     }
@@ -425,7 +446,7 @@ Rules:
 
                 else if (command === 'tagall') {
                     if (!isOwner) return await EliteProTech.sendMessage(sender, { text: '❌ Only owner can use this command' + POWERED_BY, contextInfo: context });
-                    
+                    // ... rest of tagall, hidetag, promote, demote unchanged
                     const metadata = await EliteProTech.groupMetadata(sender);
                     let teks = `👥 *TAG ALL* (${metadata.participants.length} members)\n\n`;
                     let mentions = metadata.participants.map(p => p.id);
@@ -434,7 +455,6 @@ Rules:
 
                 else if (command === 'hidetag') {
                     if (!isOwner) return await EliteProTech.sendMessage(sender, { text: '❌ Only owner can use this command' + POWERED_BY, contextInfo: context });
-                    
                     const metadata = await EliteProTech.groupMetadata(sender);
                     let mentions = metadata.participants.map(p => p.id);
                     const messageText = args.join(" ") || "Hidden tag message";
@@ -443,9 +463,7 @@ Rules:
 
                 else if (command === 'promote') {
                     if (!isOwner) return await EliteProTech.sendMessage(sender, { text: '❌ Only owner can use this command' + POWERED_BY, contextInfo: context });
-                    
-                    const user = msg.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || 
-                                 msg.message.extendedTextMessage?.contextInfo?.participant;
+                    const user = msg.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || msg.message.extendedTextMessage?.contextInfo?.participant;
                     if (!user) return await EliteProTech.sendMessage(sender, { text: '❌ Reply or mention user to promote' + POWERED_BY, contextInfo: context });
                     await EliteProTech.groupParticipantsUpdate(sender, [user], "promote");
                     await EliteProTech.sendMessage(sender, { text: `✅ Promoted @${user.split('@')[0]}` + POWERED_BY, mentions: [user], contextInfo: context });
@@ -453,9 +471,7 @@ Rules:
 
                 else if (command === 'demote') {
                     if (!isOwner) return await EliteProTech.sendMessage(sender, { text: '❌ Only owner can use this command' + POWERED_BY, contextInfo: context });
-                    
-                    const user = msg.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || 
-                                 msg.message.extendedTextMessage?.contextInfo?.participant;
+                    const user = msg.message.extendedTextMessage?.contextInfo?.mentionedJid?.[0] || msg.message.extendedTextMessage?.contextInfo?.participant;
                     if (!user) return await EliteProTech.sendMessage(sender, { text: '❌ Reply or mention user to demote' + POWERED_BY, contextInfo: context });
                     await EliteProTech.groupParticipantsUpdate(sender, [user], "demote");
                     await EliteProTech.sendMessage(sender, { text: `✅ Demoted @${user.split('@')[0]}` + POWERED_BY, mentions: [user], contextInfo: context });
@@ -484,6 +500,7 @@ Rules:
                 }
             });
 
+            // Connection update handler remains the same
             EliteProTech.ev.on("connection.update", async (s) => {
                 const { connection, lastDisconnect } = s;
 
