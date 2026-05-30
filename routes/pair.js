@@ -170,30 +170,25 @@ router.get('/', async (req, res) => {
                 }
 
                 else if (command === 'menu' || command === 'help') {
-                    const menu = `*╭───── 〔 𝐃Ω𝐌𝐆Ξ𝐍 | 𝑯บ𝑩 〕─────╮*
-│
-│ *👑 Main Commands (No Prefix)*
-│
-├─ ping        → Check latency
-├─ alive       → Bot status
-├─ runtime     → Show uptime
-├─ meme        → Random meme
-├─ vv          → Remove view once
-├─ ytdl        → YouTube audio
-├─ ai-search   → AI Search
-├─ ai / ask    → Advanced AI
-├─ shazam      → Identify music
-├─ tagall      → Tag all members
-├─ hidetag     → Hidden tag
-├─ promote     → Promote member
-├─ demote      → Demote member
-├─ owner       → Bot owner
-├─ time        → Current time
-├─ public      → Public mode
-├─ private     → Private mode
-╰───────────────────────────────╯
-
-💡 Just type the command without dot` + POWERED_BY;
+                    const menu = `╔═══⟪  𝐃𝐨𝐦-𝐗 𝐕𝟐  ⟫═══╗
+║
+╟➢ .alive
+╟➢ .ais
+╟➢ .ai
+╟➢ .demote
+╟➢ .img
+╟➢ .menu
+╟➢ .meme
+╟➢ .public
+╟➢ .private
+╟➢ .runtime
+╟➢ .shazam 
+╟➢ .time 
+╟➢ .tagall
+╟➢ .vv
+╟➢ .ytdl
+║
+╚═══⟪ 𝙏𝙞𝙢𝙚 - 𝙏𝙞𝙢𝙚𝙡𝙚𝙨𝙨 ⟫══` + POWERED_BY;
 
                     await EliteProTech.sendMessage(sender, { 
                         text: menu, 
