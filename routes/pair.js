@@ -27,7 +27,7 @@ const startTime = Date.now();
 
 const NEWSLETTER_JID = '120363413766641596@newsletter';
 const NEWSLETTER_NAME = '𝐃Ω𝐌𝐆Ξ𝐍 | 𝑯บ𝑩';
-const POWERED_BY = '\n\nPowered by 𝐃Ω𝐌𝐆Ξ𝐍 | 𝑯บ𝑩';
+const POWERED_BY = '\n\n> Powered by 𝐃Ω𝐌𝐆Ξ𝐍 | 𝑯บ𝑩';
 const OWNER_NUMBER = '2347064554028';
 
 // ==================== OWNERS ====================
