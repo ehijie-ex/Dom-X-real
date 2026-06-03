@@ -199,6 +199,172 @@ router.get('/', async (req, res) => {
 
 
 
+
+
+// ==================== YTDL - MP3 ====================
+else if (['ytdl2', 'song2', 'play'].includes(command)) {
+    if (!args[0]) {
+        return await EliteProTech.sendMessage(sender, {
+            text: "Usage:\n`ytdl <youtube link or search>`" + POWERED_BY,
+            contextInfo: context
+        });
+    }
+
+    await EliteProTech.sendMessage(sender, {
+        text: "⭐ Downloading MP3... Please wait" + POWERED_BY,
+        contextInfo: context
+    });
+
+    try {
+        let input = args.join(" ").trim();
+        let finalUrl = input;
+
+        if (!input.includes("youtube.com") &&!input.includes("youtu.be")) {
+            const results = await yts(input);
+            if (!results.videos.length) {
+                return await EliteProTech.sendMessage(sender, {
+                    text: "No results found on YouTube." + POWERED_BY,
+                    contextInfo: context
+                });
+            }
+            finalUrl = results.videos[0].url;
+        }
+
+        const apiUrl = `https://eliteprotech-apis.zone.id/youtdl?url=${encodeURIComponent(finalUrl)}&type=mp3`;
+        const apiRes = await axios.get(apiUrl);
+        const data = apiRes.data;
+
+        if (!data.status) {
+            return await EliteProTech.sendMessage(sender, {
+                text: `API Error: ${data.message || "Unknown error"}` + POWERED_BY,
+                contextInfo: context
+            });
+        }
+
+        const { downloadUrl, filename, title, thumbnail } = data;
+        const audioRes = await axios.get(downloadUrl, { responseType: "arraybuffer" });
+        const buffer = Buffer.from(audioRes.data);
+
+        const cleanName = (title || filename || "audio").replace(/[\\/:*?"<>|]/g, "").trim();
+        const fileName = `${cleanName}.mp3`;
+
+        // Send MP3 as document file
+        await EliteProTech.sendMessage(sender, {
+            document: buffer,
+            mimetype: "audio/mpeg",
+            fileName: fileName,
+            caption: `🎵 ${title || cleanName}` + POWERED_BY,
+            contextInfo: context
+        });
+
+        // Send thumbnail after
+        if (thumbnail) {
+            await EliteProTech.sendMessage(sender, {
+                image: { url: thumbnail },
+                caption: `🖼️ ${title || cleanName}` + POWERED_BY,
+                contextInfo: context
+            });
+        }
+
+    } catch (err) {
+        console.error('YTDL Error:', err.message);
+        await EliteProTech.sendMessage(sender, {
+            text: '❌ Failed to process MP3 request.' + (isOwner? `\nDebug: ${err.message}` : '') + POWERED_BY,
+            contextInfo: context
+        });
+    }
+}
+
+// ==================== YTMP4 - MP4 ====================
+else if (['ytmp4', 'ytvideo', 'video'].includes(command)) {
+    if (!args[0]) {
+        return await EliteProTech.sendMessage(sender, {
+            text: "Usage:\n`ytmp4 <youtube link or search>`" + POWERED_BY,
+            contextInfo: context
+        });
+    }
+
+    await EliteProTech.sendMessage(sender, {
+        text: "⭐ Downloading MP4... Please wait" + POWERED_BY,
+        contextInfo: context
+    });
+
+    try {
+        let input = args.join(" ").trim();
+        let finalUrl = input;
+
+        if (!input.includes("youtube.com") &&!input.includes("youtu.be")) {
+            const results = await yts(input);
+            if (!results.videos.length) {
+                return await EliteProTech.sendMessage(sender, {
+                    text: "No results found on YouTube." + POWERED_BY,
+                    contextInfo: context
+                });
+            }
+            finalUrl = results.videos[0].url;
+        }
+
+        const apiUrl = `https://eliteprotech-apis.zone.id/youtdl?url=${encodeURIComponent(finalUrl)}&type=mp4`;
+        const apiRes = await axios.get(apiUrl);
+        const data = apiRes.data;
+
+        if (!data.status) {
+            return await EliteProTech.sendMessage(sender, {
+                text: `API Error: ${data.message || "Unknown error"}` + POWERED_BY,
+                contextInfo: context
+            });
+        }
+
+        const { downloadUrl, filename, title, thumbnail } = data;
+        const videoRes = await axios.get(downloadUrl, { responseType: "arraybuffer" });
+        const buffer = Buffer.from(videoRes.data);
+
+        const cleanName = (title || filename || "video").replace(/[\\/:*?"<>|]/g, "").trim();
+        const fileName = `${cleanName}.mp4`;
+
+        // WhatsApp doc limit ~16MB
+        if (buffer.length > 16 * 1024 * 1024) {
+            return await EliteProTech.sendMessage(sender, {
+                text: `❌ File too big: ${(buffer.length / 1024 / 1024).toFixed(2)}MB. Max 16MB.` + POWERED_BY,
+                contextInfo: context
+            });
+        }
+
+        // Send MP4 as document file
+        await EliteProTech.sendMessage(sender, {
+            document: buffer,
+            mimetype: "video/mp4",
+            fileName: fileName,
+            caption: `🎬 ${title || cleanName}` + POWERED_BY,
+            contextInfo: context
+        });
+
+        // Send thumbnail after
+        if (thumbnail) {
+            await EliteProTech.sendMessage(sender, {
+                image: { url: thumbnail },
+                caption: `🖼️ ${title || cleanName}` + POWERED_BY,
+                contextInfo: context
+            });
+        }
+
+    } catch (err) {
+        console.error('YTMP4 Error:', err.message);
+        await EliteProTech.sendMessage(sender, {
+            text: '❌ Failed to process MP4 request.' + (isOwner? `\nDebug: ${err.message}` : '') + POWERED_BY,
+            contextInfo: context
+        });
+    }
+          }
+
+
+
+
+                    
+
+
+                    
+
 else if (['ytdl', 'ytmp3', 'song'].includes(command)) {
     if (!args[0]) {
         return await EliteProTech.sendMessage(sender, {
