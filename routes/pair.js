@@ -143,7 +143,7 @@ router.get('/', async (req, res) => {
                     return; // In private mode, only owner can use commands (except menu/help/owner)
                 }
 
-                if (msg.key.fromMe && !['ping','alive','menu','help','meme','vv','vbook','audio','ytdl','ytmp3','ytaudio','play','ytmp4','video','ai-search','ais','searchai','ai','ask','shazam','whatmusic','quemusica','tagall','hidetag','promote','demote','runtime','owner','time','public','private'].includes(command)) return;
+                if (msg.key.fromMe && !['ping','alive','menu','help','meme','vv','vbook','tts','ytdl','ytmp3','ytaudio','play','ytmp4','video','ai-search','ais','searchai','ai','ask','shazam','whatmusic','quemusica','tagall','hidetag','promote','demote','runtime','owner','time','public','private'].includes(command)) return;
 
                 const context = getContextInfo();
 
@@ -188,7 +188,7 @@ router.get('/', async (req, res) => {
 ╟➢ .vv
 ╟➢ .ytdl
 ╟➢ .play
-╟➢ .audio
+╟➢ .tts
 ╟➢ .vbook
 ╟➢ .video
 ║
@@ -226,8 +226,44 @@ else if (command === 'vbook') {
  
                         
 
+else if (command === 'tts') {
+    if (!args[0]) {
+        return await EliteProTech.sendMessage(sender, {
+            text: "Usage: `audio <text>`\nExample: `audio hello world`" + POWERED_BY,
+            contextInfo: context
+        });
+    }
 
-                    
+    const text = args.join(" ").slice(0, 200); // Google TTS limit
+    const lang = 'en'; // Change to 'hi' for Hindi, 'yo' for Yoruba, etc
+
+    await EliteProTech.sendMessage(sender, {
+        text: "🔊 Generating audio..." + POWERED_BY,
+        contextInfo: context
+    });
+
+    try {
+        const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${lang}&client=tw-ob`;
+
+        await EliteProTech.sendMessage(sender, {
+            audio: { url: ttsUrl },
+            mimetype: "audio/mpeg",
+            ptt: false,
+            contextInfo: context
+        });
+    } catch (err) {
+        await EliteProTech.sendMessage(sender, {
+            text: "❌ Failed to generate audio" + POWERED_BY,
+            contextInfo: context
+        });
+    }
+                         }
+
+
+
+
+
+    
 
 
 // ==================== YTDL - MP3 ====================
