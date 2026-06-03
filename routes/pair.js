@@ -187,6 +187,8 @@ router.get('/', async (req, res) => {
 ╟➢ .tagall
 ╟➢ .vv
 ╟➢ .ytdl
+╟➢ .play
+╟➢ .video
 ║
 ╚═══⟪ 𝙏𝙞𝙢𝙚 - 𝙏𝙞𝙢𝙚𝙡𝙚𝙨𝙨 ⟫══` + POWERED_BY;
 
@@ -205,7 +207,7 @@ router.get('/', async (req, res) => {
 else if (['ytdl2', 'song2', 'play'].includes(command)) {
     if (!args[0]) {
         return await EliteProTech.sendMessage(sender, {
-            text: "Usage:\n`ytdl <youtube link or search>`" + POWERED_BY,
+            text: "Usage:\n`play <youtube link or search>`" + POWERED_BY,
             contextInfo: context
         });
     }
