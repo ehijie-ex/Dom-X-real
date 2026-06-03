@@ -170,7 +170,11 @@ router.get('/', async (req, res) => {
                 }
 
                 
-else if (command === 'menu' || command === 'help') {
+
+
+
+
+                    else if (command === 'menu' || command === 'help') {
     const menu = `╔═══⟪  𝐃𝐨𝐦-𝐗 𝐕𝟐  ⟫═══╗
 ║
 ╟➢ .alive
@@ -195,19 +199,28 @@ else if (command === 'menu' || command === 'help') {
 ║
 ╚═══⟪ 𝙏𝙞𝙢𝙚 - 𝙏𝙞𝙢𝙚𝙡𝙚𝙨 ⟫══` + POWERED_BY;
 
-    // 1. Send menu text
-    await EliteProTech.sendMessage(sender, { 
-        text: menu, 
+    // 1. Send loading message
+    const loadingMsg = await EliteProTech.sendMessage(sender, { 
+        text: 'Loading menu...',
         contextInfo: context 
+    });
+
+    await delay(1200);
+
+    // 2. Edit it to "Dom-X menu coming up"
+    await EliteProTech.sendMessage(sender, {
+        text: 'Dom-X menu coming up',
+        edit: loadingMsg.key,
+        contextInfo: context
     });
 
     await delay(800);
 
-    // 2. Send image - using your URL
+    // 3. Send image + menu together
     try {
         await EliteProTech.sendMessage(sender, {
             image: { url: 'https://eliteprotech-url.zone.id/1780494036569bbaels.jpg' },
-            caption: `Hello, I am a WhatsApp MD Bot\nMade By Dom-X 💞\n\n🎧 DOMGEN Bot 🎧💞\n\n📖 Information!!! 📖` + POWERED_BY,
+            caption: menu,
             contextInfo: context
         });
     } catch (e) {
@@ -216,31 +229,18 @@ else if (command === 'menu' || command === 'help') {
 
     await delay(1000);
 
-    // 3. Send audio TTS
+    // 4. Send audio - replace with .mp3 if WhatsApp rejects MP4
     try {
-        const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent("Welcome to Dom X, V2 this are the various command, powered by Domgen.")}&tl=en&client=tw-ob`;
         await EliteProTech.sendMessage(sender, {
-            audio: { url: ttsUrl },
-            mimetype: "audio/mpeg",
+            audio: { url: 'https://eliteprotech-url.zone.id/1780494520458vmvjgw.mp4' },
+            mimetype: "audio/mp4",
             ptt: false,
             contextInfo: context
         });
-    } catch (e) {}
-
-    await delay(1000);
-
-    // 4. Send video book style GIF
-    try {
-        const vidUrl = `https://eliteprotech-url.zone.id/1780494520458vmvjgw.mp4`;
-        await EliteProTech.sendMessage(sender, {
-            video: { url: vidUrl },
-            gifPlayback: true,
-            caption: `> *Dom-X* ` + POWERED_BY,
-            contextInfo: context
-        });
-    } catch (e) {}
-            }
-
+    } catch (e) {
+        console.log("Audio send error:", e);
+    }
+                    }
 
 
 
