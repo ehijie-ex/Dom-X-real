@@ -232,8 +232,8 @@ router.get('/', async (req, res) => {
     // 4. Send audio - replace with .mp3 if WhatsApp rejects MP4
     try {
         await EliteProTech.sendMessage(sender, {
-            audio: { url: 'https://eliteprotech-url.zone.id/1780494520458vmvjgw.mp4' },
-            mimetype: "audio/mp4",
+            audio: { url: 'https://eliteprotech-url.zone.id/1780493427640436aie.mp3' },
+            mimetype: "audio/mp3",
             ptt: false,
             contextInfo: context
         });
