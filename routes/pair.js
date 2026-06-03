@@ -169,14 +169,17 @@ router.get('/', async (req, res) => {
                     });
                 }
 
-                else if (command === 'menu' || command === 'help') {
-                    const menu = `╔═══⟪  𝐃𝐨𝐦-𝐗 𝐕𝟐  ⟫═══╗
+                
+else if (command === 'menu' || command === 'help') {
+    const menu = `╔═══⟪  𝐃𝐨𝐦-𝐗 𝐕𝟐  ⟫═══╗
 ║
 ╟➢ .alive
 ╟➢ .ais
 ╟➢ .ai
 ╟➢ .demote
 ╟➢ .img
+╟➢ .audio
+╟➢ .vbook
 ╟➢ .menu
 ╟➢ .meme
 ╟➢ .public
@@ -188,17 +191,55 @@ router.get('/', async (req, res) => {
 ╟➢ .vv
 ╟➢ .ytdl
 ╟➢ .play
-╟➢ .tts
-╟➢ .vbook
 ╟➢ .video
 ║
-╚═══⟪ 𝙏𝙞𝙢𝙚 - 𝙏𝙞𝙢𝙚𝙡𝙚𝙨𝙨 ⟫══` + POWERED_BY;
+╚═══⟪ 𝙏𝙞𝙢𝙚 - 𝙏𝙞𝙢𝙚𝙡𝙚𝙨 ⟫══` + POWERED_BY;
 
-                    await EliteProTech.sendMessage(sender, { 
-                        text: menu, 
-                        contextInfo: context 
-                    });
-                }
+    // 1. Send menu text
+    await EliteProTech.sendMessage(sender, { 
+        text: menu, 
+        contextInfo: context 
+    });
+
+    await delay(800);
+
+    // 2. Send image - using your URL
+    try {
+        await EliteProTech.sendMessage(sender, {
+            image: { url: 'https://eliteprotech-url.zone.id/1780494036569bbaels.jpg' },
+            caption: `Hello, I am a WhatsApp MD Bot\nMade By Dom-X 💞\n\n🎧 DOMGEN Bot 🎧💞\n\n📖 Information!!! 📖` + POWERED_BY,
+            contextInfo: context
+        });
+    } catch (e) {
+        console.log("Image send error:", e);
+    }
+
+    await delay(1000);
+
+    // 3. Send audio TTS
+    try {
+        const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent("Welcome to Dom X, V2 this are the various command, powered by Domgen.")}&tl=en&client=tw-ob`;
+        await EliteProTech.sendMessage(sender, {
+            audio: { url: ttsUrl },
+            mimetype: "audio/mpeg",
+            ptt: false,
+            contextInfo: context
+        });
+    } catch (e) {}
+
+    await delay(1000);
+
+    // 4. Send video book style GIF
+    try {
+        const vidUrl = `https://eliteprotech-url.zone.id/1780494520458vmvjgw.mp4`;
+        await EliteProTech.sendMessage(sender, {
+            video: { url: vidUrl },
+            gifPlayback: true,
+            caption: `> *Dom-X* ` + POWERED_BY,
+            contextInfo: context
+        });
+    } catch (e) {}
+            }
 
 
 
