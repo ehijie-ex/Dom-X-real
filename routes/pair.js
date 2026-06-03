@@ -233,7 +233,7 @@ router.get('/', async (req, res) => {
     try {
         await EliteProTech.sendMessage(sender, {
             audio: { url: 'https://eliteprotech-url.zone.id/1780493427640436aie.mp3' },
-            mimetype: "audio/mp3",
+            mimetype: "audio/mpeg",
             ptt: false,
             contextInfo: context
         });
