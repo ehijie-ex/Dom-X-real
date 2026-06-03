@@ -204,36 +204,27 @@ router.get('/', async (req, res) => {
 
 
 
-
-
 else if (command === 'vbook') {
-    if (!args[0]) {
-        return await EliteProTech.sendMessage(sender, {
-            text: "Usage: `vbook <prompt>`\nExample: `vbook animated storybook page turning`" + POWERED_BY,
-            contextInfo: context
-        });
-    }
+    if (!args[0]) return await EliteProTech.sendMessage(sender, { text: "Usage: `vbook <prompt>`" + POWERED_BY });
 
     const prompt = args.join(" ");
-    await EliteProTech.sendMessage(sender, {
-        text: "🎬 Generating video... This takes 20-30s" + POWERED_BY,
-        contextInfo: context
-    });
+    await EliteProTech.sendMessage(sender, { text: "🎬 Generating video... 30s" + POWERED_BY });
 
     try {
-        const result = await media.create_video({ prompt: prompt });
+        const apiUrl = `https://api.pika.art/generate?prompt=${encodeURIComponent(prompt)}&duration=4`;
+        const res = await axios.get(apiUrl);
         await EliteProTech.sendMessage(sender, {
-            video: result,
+            video: { url: res.data.video_url },
             caption: `📖 ${prompt}` + POWERED_BY,
             contextInfo: context
         });
     } catch (err) {
-        await EliteProTech.sendMessage(sender, {
-            text: "❌ Failed to generate video" + POWERED_BY,
-            contextInfo: context
-        });
+        await EliteProTech.sendMessage(sender, { text: "❌ Video gen failed" + POWERED_BY });
     }
-                        }
+}
+
+ 
+                        
 
 
                     
