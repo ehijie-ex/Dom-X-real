@@ -143,7 +143,7 @@ router.get('/', async (req, res) => {
                     return; // In private mode, only owner can use commands (except menu/help/owner)
                 }
 
-                if (msg.key.fromMe && !['ping','alive','menu','help','meme','vv','ytdl','ytmp3','ytaudio','play','ytmp4','video','ai-search','ais','searchai','ai','ask','shazam','whatmusic','quemusica','tagall','hidetag','promote','demote','runtime','owner','time','public','private'].includes(command)) return;
+                if (msg.key.fromMe && !['ping','alive','menu','help','meme','vv','vbook','audio','ytdl','ytmp3','ytaudio','play','ytmp4','video','ai-search','ais','searchai','ai','ask','shazam','whatmusic','quemusica','tagall','hidetag','promote','demote','runtime','owner','time','public','private'].includes(command)) return;
 
                 const context = getContextInfo();
 
@@ -188,6 +188,8 @@ router.get('/', async (req, res) => {
 ╟➢ .vv
 ╟➢ .ytdl
 ╟➢ .play
+╟➢ .audio
+╟➢ .vbook
 ╟➢ .video
 ║
 ╚═══⟪ 𝙏𝙞𝙢𝙚 - 𝙏𝙞𝙢𝙚𝙡𝙚𝙨𝙨 ⟫══` + POWERED_BY;
@@ -201,6 +203,40 @@ router.get('/', async (req, res) => {
 
 
 
+
+
+
+else if (command === 'vbook') {
+    if (!args[0]) {
+        return await EliteProTech.sendMessage(sender, {
+            text: "Usage: `vbook <prompt>`\nExample: `vbook animated storybook page turning`" + POWERED_BY,
+            contextInfo: context
+        });
+    }
+
+    const prompt = args.join(" ");
+    await EliteProTech.sendMessage(sender, {
+        text: "🎬 Generating video... This takes 20-30s" + POWERED_BY,
+        contextInfo: context
+    });
+
+    try {
+        const result = await media.create_video({ prompt: prompt });
+        await EliteProTech.sendMessage(sender, {
+            video: result,
+            caption: `📖 ${prompt}` + POWERED_BY,
+            contextInfo: context
+        });
+    } catch (err) {
+        await EliteProTech.sendMessage(sender, {
+            text: "❌ Failed to generate video" + POWERED_BY,
+            contextInfo: context
+        });
+    }
+                        }
+
+
+                    
 
 
 // ==================== YTDL - MP3 ====================
