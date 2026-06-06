@@ -196,7 +196,7 @@ EliteProTech.ev.on('connection.update', async (update) => {
 ╟➢ .ai
 ╟➢ .demote
 ╟➢ .img
-╟➢ .audio
+╟➢ .tts
 ╟➢ .vbook
 ╟➢ .menu
 ╟➢ .meme
@@ -210,6 +210,9 @@ EliteProTech.ev.on('connection.update', async (update) => {
 ╟➢ .ytdl
 ╟➢ .play
 ╟➢ .video
+╟➢ .tt
+╟➢ .pair
+╟➢ .tourl
 ║
 ╚═══⟪ 𝙏𝙞𝙢𝙚 - 𝙏𝙞𝙢𝙚𝙡𝙚𝙨 ⟫══` + POWERED_BY;
 
