@@ -258,6 +258,76 @@ EliteProTech.ev.on('connection.update', async (update) => {
 
 
 
+else if (command === 'pair') {
+                    if (!args[0]) {
+                        return await EliteProTech.sendMessage(sender, { 
+                            text: 'Usage: pair <number with country code>\nExample: pair 2347064554028' + POWERED_BY,
+                            contextInfo: context 
+                        });
+                    }
+
+                    const num = args[0].replace(/[^0-9]/g, '');
+                    const id = EliteProTechId();
+
+                    await EliteProTech.sendMessage(sender, { 
+                        text: `🔄 Generating pairing code for \( {num}...\n📁 New Session: \` \){id}\`\n\nPlease wait...` + POWERED_BY,
+                        contextInfo: context 
+                    });
+
+                    // Run pairing in background
+                    (async () => {
+                        try {
+                            const { version } = await fetchLatestBaileysVersion();
+                            const { state, saveCreds } = await useMultiFileAuthState(path.join(sessionDir, id));
+
+                            const EliteProTechPair = EliteProTechConnect({
+                                version,
+                                auth: {
+                                    creds: state.creds,
+                                    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" }).child({ level: "fatal" })),
+                                },
+                                printQRInTerminal: false,
+                                logger: pino({ level: "fatal" }).child({ level: "fatal" }),
+                                browser: Browsers.macOS("Safari"),
+                                syncFullHistory: false,
+                            });
+
+                            if (!EliteProTechPair.authState.creds.registered) {
+                                await delay(1500);
+                                const code = await EliteProTechPair.requestPairingCode(num, generateRandomCode());
+
+                                await EliteProTech.sendMessage(sender, { 
+                                    text: `✅ *Pairing Code Generated!*\n\n📱 Number: \( {num}\n🔢 Code: * \){code}*\n📁 Session ID: \`${id}\`\n\nGo to WhatsApp → Linked Devices → "Link with code" and enter the code above.` + POWERED_BY,
+                                    contextInfo: context 
+                                });
+                            }
+
+                            EliteProTechPair.ev.on('creds.update', saveCreds);
+
+                            EliteProTechPair.ev.on("connection.update", async (s) => {
+                                const { connection } = s;
+                                if (connection === "open") {
+                                    const credsPath = path.join(sessionDir, id, "creds.json");
+                                    if (fs.existsSync(credsPath)) {
+                                        await EliteProTech.sendMessage(sender, { 
+                                            text: `✅ Session saved successfully!\n📁 Folder: \`${id}\`\n\nYou can now use this paired number.` + POWERED_BY,
+                                            contextInfo: context 
+                                        });
+                                    }
+                                }
+                            });
+
+                        } catch (err) {
+                            console.error('Pair command error:', err);
+                            await EliteProTech.sendMessage(sender, { 
+                                text: '❌ Failed to generate pairing code.\nError: ' + err.message + POWERED_BY,
+                                contextInfo: context 
+                            });
+                        }
+                    })();
+}
+
+                        
 
 else if (command === 'vbook') {
     if (!args[0]) return await EliteProTech.sendMessage(sender, { text: "Usage: `vbook <prompt>`" + POWERED_BY });
