@@ -150,7 +150,9 @@ EliteProTech.ev.on('connection.update', async (update) => {
                 const args = text.split(' ').slice(1);
 
                 const isOwner = OWNERS.includes(sender);
+const context = getContextInfo(); // <-- move this up here
 
+                
                 // Mode Check
 const isBotPairedNumber = BOT_NUMBER && sender === BOT_NUMBER;
 
