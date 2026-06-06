@@ -150,21 +150,9 @@ EliteProTech.ev.on('connection.update', async (update) => {
                 const args = text.split(' ').slice(1);
 
                 const isOwner = OWNERS.includes(sender);
-const context = getContextInfo(); // <-- move this up here
-
                 
                 // Mode Check
-const isBotPairedNumber = BOT_NUMBER && sender === BOT_NUMBER;
 
-// Lock .public and .private to only the paired number
-if (['public', 'private'].includes(command) && !isBotPairedNumber) {
-    return await EliteProTech.sendMessage(sender, {
-        text: '❌ Only the bot owner can change modes.' + POWERED_BY,
-        contextInfo: context
-    });
-}
-
-                               
                 if (!isOwner && !isPublic && !['menu', 'help', 'owner'].includes(command)) {
                     return; // In private mode, only owner can use commands (except menu/help/owner)
                 }
