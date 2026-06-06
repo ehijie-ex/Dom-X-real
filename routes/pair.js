@@ -919,6 +919,28 @@ Rules:
                     }
                 }
 
+
+
+else if (command === 'tagall' || command === 'everyone') {
+    if (!isGroup) return await EliteProTech.sendMessage(sender, { text: '❌ Group only.' + POWERED_BY, contextInfo: context });
+    if (!isAdmin && !isOwner) return await EliteProTech.sendMessage(sender, { text: '❌ Admins only.' + POWERED_BY, contextInfo: context });
+    const members = groupMetadata.participants.map(p => p.id);
+    const text = args.join(' ') || '👋 Tagging everyone:';
+    await EliteProTech.sendMessage(sender, { text, mentions: members, contextInfo: { ...context, mentionedJid: members } });
+}
+
+else if (command === 'hidetag') {
+    if (!isGroup) return await EliteProTech.sendMessage(sender, { text: '❌ Group only.' + POWERED_BY, contextInfo: context });
+    if (!isAdmin && !isOwner) return await EliteProTech.sendMessage(sender, { text: '❌ Admins only.' + POWERED_BY, contextInfo: context });
+    const members = groupMetadata.participants.map(p => p.id);
+    const text = args.join(' ') || '📢 Attention:';
+    await EliteProTech.sendMessage(sender, { text, mentions: members, contextInfo: { ...context, mentionedJid: members } });
+                            }
+
+
+
+                                    
+
                 else if (command === 'vv') {
                     const quoted = msg.message.extendedTextMessage?.contextInfo?.quotedMessage;
                     if (!quoted) {
