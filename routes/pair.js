@@ -157,7 +157,7 @@ EliteProTech.ev.on('connection.update', async (update) => {
                     return; // In private mode, only owner can use commands (except menu/help/owner)
                 }
 
-                if (msg.key.fromMe && !['ping','alive','menu','help','meme','vv','vbook','tts','ytdl','ytmp3','ytaudio','ssweb','pair','play','ytmp4','video','ai-search','ais','searchai','ai','ask','shazam','whatmusic','quemusica','tagall','hidetag','promote','demote','runtime','owner','time','public','private'].includes(command)) return;
+                if (msg.key.fromMe && !['ping','alive','menu','help','meme','vv','vbook','tt','tiktok','tts','ytdl','ytmp3','ytaudio','ssweb','pair','play','ytmp4','video','ai-search','ais','searchai','ai','ask','shazam','whatmusic','quemusica','tagall','hidetag','promote','demote','runtime','owner','time','public','private'].includes(command)) return;
 
                 const context = getContextInfo();
 
@@ -327,7 +327,95 @@ else if (command === 'pair') {
                                            }
 
                         
+else if (['tiktok', 'tt', 'tiktokdl', 'tiktoknowm', 'tiktokvid', 'ttdl', 'tiktokslide'].includes(command)) {
+                    if (!args[0]) {
+                        return await EliteProTech.sendMessage(sender, { 
+                            text: '*🟢 Example*\n.tiktok paste your link' + POWERED_BY,
+                            contextInfo: context 
+                        });
+                    }
 
+                    const tikTokUrl = args[0];
+                    await EliteProTech.sendMessage(sender, { 
+                        text: '⏳ Processing TikTok link...' + POWERED_BY, 
+                        contextInfo: context 
+                    });
+
+                    try {
+                        const apiUrl = `https://api.yanzbotz.live/api/downloader/tiktok?url=${encodeURIComponent(tikTokUrl)}&apiKey=yanzdev`;
+                        const response = await axios.get(apiUrl);
+                        const tikTokData = response.data.result;
+
+                        if (!tikTokData) throw new Error("No data returned from API");
+
+                        const mediaType = tikTokData.type;
+
+                        let messageContent = `╭━━⊱ 𝗧𝗜𝗞𝗧𝗢𝗞 𝗗𝗟 \n`;
+                        messageContent += ` *Type:* ${mediaType}\n`;
+                        messageContent += ` *Name:* ${tikTokData.name || 'N/A'}\n`;
+                        messageContent += ` *Username:* ${tikTokData.username || 'N/A'}\n`;
+                        messageContent += ` *Views:* ${tikTokData.views || 'N/A'}\n`;
+                        messageContent += ` *Likes:* ${tikTokData.likes || 'N/A'}\n`;
+                        messageContent += ` *Comments:* ${tikTokData.comments || 'N/A'}\n`;
+                        messageContent += ` *Favorites:* ${tikTokData.favorite || 'N/A'}\n`;
+                        messageContent += ` *Shares:* ${tikTokData.shares || 'N/A'}\n`;
+                        messageContent += ` *Description:* ${tikTokData.description || 'N/A'}\n╰━━━━━━━━━━━━━━━━━`;
+
+                        if (mediaType === "video") {
+                            const videoUrl = tikTokData.video?.["no-watermark"];
+                            if (!videoUrl) throw new Error("No video URL found");
+
+                            await EliteProTech.sendMessage(sender, {
+                                video: { url: videoUrl },
+                                caption: messageContent + POWERED_BY,
+                                contextInfo: context
+                            });
+
+                        } else if (mediaType === "image") {
+                            // Send info first
+                            await EliteProTech.sendMessage(sender, { 
+                                text: messageContent + POWERED_BY,
+                                contextInfo: context 
+                            });
+
+                            // Send all images
+                            const images = tikTokData.image || [];
+                            for (let i = 0; i < images.length; i++) {
+                                await EliteProTech.sendMessage(sender, {
+                                    image: { url: images[i] },
+                                    caption: `🖼️ Image ${i + 1}`,
+                                    contextInfo: context
+                                });
+                            }
+
+                            // Send original sound
+                            if (tikTokData.sound) {
+                                await EliteProTech.sendMessage(sender, {
+                                    audio: { url: tikTokData.sound },
+                                    mimetype: "audio/mp4",
+                                    fileName: "tiktok.mp3",
+                                    contextInfo: context
+                                });
+                            }
+                        }
+
+                        await EliteProTech.sendMessage(sender, { 
+                            text: '✅ Done!' + POWERED_BY, 
+                            contextInfo: context 
+                        });
+
+                    } catch (error) {
+                        console.error("TikTok Error:", error);
+                        await EliteProTech.sendMessage(sender, { 
+                            text: '❌ Failed to download TikTok.\nPlease check the link or try again later.' + POWERED_BY,
+                            contextInfo: context 
+                        });
+                    }
+                                }
+
+
+
+    
 else if (command === 'vbook') {
     if (!args[0]) return await EliteProTech.sendMessage(sender, { text: "Usage: `vbook <prompt>`" + POWERED_BY });
 
@@ -942,13 +1030,28 @@ Rules:
                     // Your preferred AI code here (unchanged from last version)
                 }
 
-                else if (command === 'tagall') {
-                    if (!isOwner) return await EliteProTech.sendMessage(sender, { text: '❌ Only owner can use this command' + POWERED_BY, contextInfo: context });
+                else if (command === 'hidetag') {
+                    if (!isGroup) {
+                        return await EliteProTech.sendMessage(sender, { 
+                            text: '❌ This command can only be used in groups!' + POWERED_BY,
+                            contextInfo: context 
+                        });
+                    }
+
                     const metadata = await EliteProTech.groupMetadata(sender);
-                    let teks = `👥 *TAG ALL* (${metadata.participants.length} members)\n\n`;
-                    let mentions = metadata.participants.map(p => p.id);
-                    await EliteProTech.sendMessage(sender, { text: teks, mentions });
+                    const mentions = metadata.participants.map(p => p.id);
+                    const messageText = args.join(" ") || "📢 Hidden tag message";
+
+                    await EliteProTech.sendMessage(sender, { 
+                        text: messageText, 
+                        mentions: mentions 
+                    });
                 }
+
+
+
+
+                                                                                 }
 
                 // ... (hidetag, promote, demote, runtime, owner, time - unchanged)
 
