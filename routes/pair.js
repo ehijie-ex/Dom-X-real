@@ -1016,24 +1016,8 @@ Rules:
                     }
                 }
 
-                // ... (rest of your commands: ytdl, ai-search, ai, tagall, etc. remain the same)
-
-                else if (['ytdl', 'ytmp3', 'ytaudio'].includes(command)) {
-                    // Your existing YouTube code here (unchanged)
-                }
-
-                else if (['ai-search', 'ais', 'searchai'].includes(command)) {
-                    // Your existing ai-search code here (unchanged)
-                }
-
-                else if (command === 'ai' || command === 'ask') {
-                    // Your preferred AI code here (unchanged from last version)
-                }
-
                 
-
-
-                                                                                 }
+                                                                                 
 
                 // ... (hidetag, promote, demote, runtime, owner, time - unchanged)
 
