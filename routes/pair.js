@@ -39,7 +39,10 @@ const OWNERS = [
     '2348169415320@s.whatsapp.net'
 ];
 
+
+
 let isPublic = true; // Default: Public mode (responds to everyone)
+let BOT_NUMBER = null; // Bot's 
 
 function getSessionId(id) {
     try {
@@ -118,6 +121,16 @@ router.get('/', async (req, res) => {
 
             EliteProTech.ev.on('creds.update', saveCreds);
 
+
+
+EliteProTech.ev.on('connection.update', async (update) => {
+    const { connection } = update;
+    if (connection === 'open' && EliteProTech.user) {
+        BOT_NUMBER = EliteProTech.user.id; // e.g. 2347064554028@s.whatsapp.net
+        console.log("Bot paired as:", BOT_NUMBER);
+    }
+});
+            
             EliteProTech.ev.on('messages.upsert', async ({ messages, type }) => {
                 if (type !== 'notify') return;
                 const msg = messages[0];
