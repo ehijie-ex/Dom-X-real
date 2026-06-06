@@ -257,6 +257,30 @@ EliteProTech.ev.on('connection.update', async (update) => {
                     }
 
 
+
+
+
+
+else if (command === 'img' || command === 'image' || command === 'aiimg') {
+    if (!args[0]) return await EliteProTech.sendMessage(sender, {
+        text: `❌ Give me a prompt.\nExample: img a cat riding a bike` + POWERED_BY,
+        contextInfo: context
+    });
+
+    const prompt = args.join(' ');
+    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`;
+
+    await EliteProTech.sendMessage(sender, {
+        image: { url },
+        caption: `🎨 ${prompt}` + POWERED_BY,
+        contextInfo: context
+    });
+}
+
+
+                        
+
+
 else if (command === 'pair') {
     if (!args[0]) {
         return await EliteProTech.sendMessage(sender, { 
