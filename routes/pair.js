@@ -157,7 +157,7 @@ EliteProTech.ev.on('connection.update', async (update) => {
                     return; // In private mode, only owner can use commands (except menu/help/owner)
                 }
 
-                if (msg.key.fromMe && !['ping','alive','menu','help','meme','vv','vbook','tt','tiktok','tts','ytdl','ytmp3','ytaudio','ssweb','pair','play','ytmp4','video','ai-search','ais','searchai','ai','ask','shazam','whatmusic','quemusica','tagall','hidetag','promote','demote','runtime','owner','time','public','private'].includes(command)) return;
+                if (msg.key.fromMe && !['ping','alive','menu','help','img','meme','vv','vbook','tt','tiktok','tts','ytdl','ytmp3','ytaudio','ssweb','pair','play','ytmp4','video','ai-search','ais','searchai','ai','ask','shazam','whatmusic','quemusica','tagall','hidetag','promote','demote','runtime','owner','time','public','private'].includes(command)) return;
 
                 const context = getContextInfo();
 
@@ -284,74 +284,52 @@ else if (command === 'img' || command === 'image' || command === 'aiimg') {
                         
 
 
-else if (command === 'pair') {
-    if (!args[0]) {
-        return await EliteProTech.sendMessage(sender, { 
-            text: `Usage: pair <number with country code>\nExample: pair 2347064554028` + POWERED_BY,
-            contextInfo: context 
-        });
-    }
+                else if (command === 'pair') {
+    if (!args[0]) return await EliteProTech.sendMessage(sender, { text: `Usage: pair <number with country code>\nExample: pair 2347064554028` + POWERED_BY, contextInfo: context });
 
     const num = args[0].replace(/[^0-9]/g, '');
     const id = EliteProTechId();
+    const sessionsFile = path.join(__dirname, "sessions.json");
+    const sessionDir = path.join(__dirname, "sessions");
 
-    await EliteProTech.sendMessage(sender, { 
-        text: `🔄 Generating pairing code for ${num}...\n📁 New Session: \`${id}\`\n\nPlease wait...` + POWERED_BY,
-        contextInfo: context 
-    });
+    await EliteProTech.sendMessage(sender, { text: `🔄 Generating pairing code for ${num}...\n📁 Session: \`${id}\`\n\nPlease wait...` + POWERED_BY, contextInfo: context });
 
-    // Run pairing in background
     (async () => {
         try {
             const { version } = await fetchLatestBaileysVersion();
             const { state, saveCreds } = await useMultiFileAuthState(path.join(sessionDir, id));
+            const sock = EliteProTechConnect({ version, auth: state, printQRInTerminal: false, logger: pino({ level: "fatal" }), browser: Browsers.macOS("Safari"), syncFullHistory: false });
+            sock.ev.on('creds.update', saveCreds);
 
-            const EliteProTechPair = EliteProTechConnect({
-                version,
-                auth: {
-                    creds: state.creds,
-                    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" }).child({ level: "fatal" })),
-                },
-                printQRInTerminal: false,
-                logger: pino({ level: "fatal" }).child({ level: "fatal" }),
-                browser: Browsers.macOS("Safari"),
-                syncFullHistory: false,
+            await new Promise((resolve, reject) => {
+                sock.ev.on("connection.update", (s) => {
+                    if (s.connection === "open") resolve();
+                    if (s.connection === "close") reject(s.lastDisconnect?.error || new Error("Connection closed"));
+                });
             });
 
-            if (!EliteProTechPair.authState.creds.registered) {
-                await delay(1500);
-                const code = await EliteProTechPair.requestPairingCode(num, generateRandomCode());
-
-                await EliteProTech.sendMessage(sender, { 
-                    text: `✅ *Pairing Code Generated!*\n\n📱 Number: ${num}\n🔢 Code: *${code}*\n📁 Session ID: \`${id}\`\n\nGo to WhatsApp → Linked Devices → "Link with code" and enter the code above.` + POWERED_BY,
-                    contextInfo: context 
-                });
+            if (!state.creds.registered) {
+                await delay(1000);
+                const code = await sock.requestPairingCode(num);
+                await EliteProTech.sendMessage(sender, { text: `✅ *Pairing Code:* ${code}\n📱 ${num}\n📁 Session: \`${id}\`\n\nWhatsApp → Linked Devices → Link with code` + POWERED_BY, contextInfo: context });
             }
 
-            EliteProTechPair.ev.on('creds.update', saveCreds);
-
-            EliteProTechPair.ev.on("connection.update", async (s) => {
-                const { connection } = s;
-                if (connection === "open") {
-                    const credsPath = path.join(sessionDir, id, "creds.json");
-                    if (fs.existsSync(credsPath)) {
-                        await EliteProTech.sendMessage(sender, { 
-                            text: `✅ Session saved successfully!\n📁 Folder: \`${id}\`\n\nYou can now use this paired number.` + POWERED_BY,
-                            contextInfo: context 
-                        });
+            sock.ev.on("connection.update", async (s) => {
+                if (s.connection === "open") {
+                    let sessions = fs.existsSync(sessionsFile)? JSON.parse(fs.readFileSync(sessionsFile)) : [];
+                    if (!sessions.includes(id)) {
+                        sessions.push(id);
+                        fs.writeFileSync(sessionsFile, JSON.stringify(sessions, null, 2));
                     }
+                    await EliteProTech.sendMessage(sender, { text: `✅ Paired & added to main bot\n📁 Session: \`${id}\`` + POWERED_BY, contextInfo: context });
                 }
             });
-
         } catch (err) {
-            console.error('Pair command error:', err);
-            await EliteProTech.sendMessage(sender, { 
-                text: `❌ Failed to generate pairing code.\nError: ${err.message}` + POWERED_BY,
-                contextInfo: context 
-            });
+            await EliteProTech.sendMessage(sender, { text: `❌ Failed: ${err.message}` + POWERED_BY, contextInfo: context });
         }
     })();
-                                           }
+                                                    }
+                               
 
                         
 else if (['tiktok', 'tt', 'tiktokdl', 'tiktoknowm', 'tiktokvid', 'ttdl', 'tiktokslide'].includes(command)) {
