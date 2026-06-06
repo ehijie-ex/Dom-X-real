@@ -1030,25 +1030,7 @@ Rules:
                     // Your preferred AI code here (unchanged from last version)
                 }
 
-                else if (command === 'hidetag') {
-                    if (!isGroup) {
-                        return await EliteProTech.sendMessage(sender, { 
-                            text: '❌ This command can only be used in groups!' + POWERED_BY,
-                            contextInfo: context 
-                        });
-                    }
-
-                    const metadata = await EliteProTech.groupMetadata(sender);
-                    const mentions = metadata.participants.map(p => p.id);
-                    const messageText = args.join(" ") || "📢 Hidden tag message";
-
-                    await EliteProTech.sendMessage(sender, { 
-                        text: messageText, 
-                        mentions: mentions 
-                    });
-                }
-
-
+                
 
 
                                                                                  }
