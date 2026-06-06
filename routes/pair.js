@@ -157,7 +157,7 @@ EliteProTech.ev.on('connection.update', async (update) => {
                     return; // In private mode, only owner can use commands (except menu/help/owner)
                 }
 
-                if (msg.key.fromMe && !['ping','alive','menu','help','meme','vv','vbook','tts','ytdl','ytmp3','ytaudio','play','ytmp4','video','ai-search','ais','searchai','ai','ask','shazam','whatmusic','quemusica','tagall','hidetag','promote','demote','runtime','owner','time','public','private'].includes(command)) return;
+                if (msg.key.fromMe && !['ping','alive','menu','help','meme','vv','vbook','tts','ytdl','ytmp3','ytaudio','ssweb','pair','play','ytmp4','video','ai-search','ais','searchai','ai','ask','shazam','whatmusic','quemusica','tagall','hidetag','promote','demote','runtime','owner','time','public','private'].includes(command)) return;
 
                 const context = getContextInfo();
 
@@ -278,7 +278,53 @@ else if (command === 'vbook') {
     }
 }
 
- 
+
+
+
+    else if (command === 'ssweb') {
+                    if (!args[0]) {
+                        return await EliteProTech.sendMessage(sender, { 
+                            text: 'Usage: ssweb <url>\nExample: ssweb https://google.com' + POWERED_BY,
+                            contextInfo: context 
+                        });
+                    }
+
+                    let url = args[0].trim();
+                    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                        url = 'https://' + url;
+                    }
+
+                    await EliteProTech.sendMessage(sender, { 
+                        text: '📸 Taking screenshot of the website...' + POWERED_BY,
+                        contextInfo: context 
+                    });
+
+                    try {
+                        // Using thum.io - reliable free screenshot service
+                        const apiUrl = `https://image.thum.io/get/width/1280/crop/800/fullpage/noanimate/${encodeURIComponent(url)}`;
+                        
+                        const res = await axios.get(apiUrl, { 
+                            responseType: 'arraybuffer',
+                            timeout: 30000 
+                        });
+
+                        const buffer = Buffer.from(res.data);
+
+                        await EliteProTech.sendMessage(sender, {
+                            image: buffer,
+                            caption: `📸 *Website Screenshot*\n\n🔗 ${url}` + POWERED_BY,
+                            contextInfo: context
+                        });
+
+                    } catch (err) {
+                        console.error('SSWEB Error:', err.message);
+                        await EliteProTech.sendMessage(sender, { 
+                            text: '❌ Failed to take screenshot.\nThe website may be blocking screenshots or is invalid.' + POWERED_BY,
+                            contextInfo: context 
+                        });
+                    }
+                    }
+        
                         
 
 else if (command === 'tts') {
