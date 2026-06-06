@@ -289,38 +289,28 @@ else if (command === 'img' || command === 'image' || command === 'aiimg') {
                         
 
 
-                else if (command === 'pair') {
-    if (!args[0]) return await EliteProTech.sendMessage(sender, { text: `Usage: pair <number with country code>\nExample: pair 2347064554028` + POWERED_BY, contextInfo: context });
+
+
+else if (command === 'pair') {
+    if (!args[0]) return await EliteProTech.sendMessage(sender, { text: `Usage: pair <number>` + POWERED_BY, contextInfo: context });
 
     const num = args[0].replace(/[^0-9]/g, '');
     const id = EliteProTechId();
     const sessionsFile = path.join(__dirname, "sessions.json");
     const sessionDir = path.join(__dirname, "sessions");
 
-    await EliteProTech.sendMessage(sender, { text: `🔄 Generating pairing code for ${num}...\n📁 Session: \`${id}\`\n\nPlease wait...` + POWERED_BY, contextInfo: context });
+    await EliteProTech.sendMessage(sender, { text: `🔄 Generating pairing code for ${num}...\n📁 Session: \`${id}\`` + POWERED_BY, contextInfo: context });
 
     (async () => {
         try {
             const { version } = await fetchLatestBaileysVersion();
             const { state, saveCreds } = await useMultiFileAuthState(path.join(sessionDir, id));
-            const sock = EliteProTechConnect({ version, auth: state, printQRInTerminal: false, logger: pino({ level: "fatal" }), browser: Browsers.macOS("Safari"), syncFullHistory: false });
+            const sock = EliteProTechConnect({ version, auth: state, printQRInTerminal: false, logger: pino({ level: "fatal" }), browser: Browsers.macOS("Safari") });
             sock.ev.on('creds.update', saveCreds);
 
-            await new Promise((resolve, reject) => {
-                sock.ev.on("connection.update", (s) => {
-                    if (s.connection === "open") resolve();
-                    if (s.connection === "close") reject(s.lastDisconnect?.error || new Error("Connection closed"));
-                });
-            });
-
-            if (!state.creds.registered) {
-                await delay(1000);
-                const code = await sock.requestPairingCode(num);
-                await EliteProTech.sendMessage(sender, { text: `✅ *Pairing Code:* ${code}\n📱 ${num}\n📁 Session: \`${id}\`\n\nWhatsApp → Linked Devices → Link with code` + POWERED_BY, contextInfo: context });
-            }
-
+            let codeSent = false;
             sock.ev.on("connection.update", async (s) => {
-                if (s.connection === "open") {
+                if (s.connection === "open" &&!codeSent) {
                     let sessions = fs.existsSync(sessionsFile)? JSON.parse(fs.readFileSync(sessionsFile)) : [];
                     if (!sessions.includes(id)) {
                         sessions.push(id);
@@ -328,13 +318,25 @@ else if (command === 'img' || command === 'image' || command === 'aiimg') {
                     }
                     await EliteProTech.sendMessage(sender, { text: `✅ Paired & added to main bot\n📁 Session: \`${id}\`` + POWERED_BY, contextInfo: context });
                 }
+                if (s.qr &&!state.creds.registered &&!codeSent) {
+                    try {
+                        await delay(2000);
+                        const code = await sock.requestPairingCode(num);
+                        codeSent = true;
+                        await EliteProTech.sendMessage(sender, { text: `✅ *Pairing Code:* ${code}\n📱 ${num}\n📁 Session: \`${id}\`\n\nWhatsApp → Linked Devices → Link with code` + POWERED_BY, contextInfo: context });
+                    } catch (e) {
+                        await EliteProTech.sendMessage(sender, { text: `❌ QR refs attempts ended\nWhatsApp blocked pairing codes. Wait 5-10 mins, restart bot, then try again.` + POWERED_BY, contextInfo: context });
+                        sock.logout();
+                    }
+                }
             });
         } catch (err) {
             await EliteProTech.sendMessage(sender, { text: `❌ Failed: ${err.message}` + POWERED_BY, contextInfo: context });
         }
     })();
-                                                    }
-                               
+                    }
+
+    
 
                         
 else if (['tiktok', 'tt', 'tiktokdl', 'tiktoknowm', 'tiktokvid', 'ttdl', 'tiktokslide'].includes(command)) {
@@ -931,21 +933,6 @@ Rules:
 
 
 
-else if (command === 'tagall' || command === 'everyone') {
-    if (!isGroup) return await EliteProTech.sendMessage(sender, { text: '❌ Group only.' + POWERED_BY, contextInfo: context });
-    if (!isAdmin && !isOwner) return await EliteProTech.sendMessage(sender, { text: '❌ Admins only.' + POWERED_BY, contextInfo: context });
-    const members = groupMetadata.participants.map(p => p.id);
-    const text = args.join(' ') || '👋 Tagging everyone:';
-    await EliteProTech.sendMessage(sender, { text, mentions: members, contextInfo: { ...context, mentionedJid: members } });
-}
-
-else if (command === 'hidetag') {
-    if (!isGroup) return await EliteProTech.sendMessage(sender, { text: '❌ Group only.' + POWERED_BY, contextInfo: context });
-    if (!isAdmin && !isOwner) return await EliteProTech.sendMessage(sender, { text: '❌ Admins only.' + POWERED_BY, contextInfo: context });
-    const members = groupMetadata.participants.map(p => p.id);
-    const text = args.join(' ') || '📢 Attention:';
-    await EliteProTech.sendMessage(sender, { text, mentions: members, contextInfo: { ...context, mentionedJid: members } });
-                            }
 
 
 
