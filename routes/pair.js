@@ -898,7 +898,15 @@ Rules:
 
 
 
+else if (command === 'get') {
+    if (!isOwner) return;
 
+    await EliteProTech.sendMessage(sender, {
+        document: fs.readFileSync(__filename),
+        mimetype: 'application/javascript',
+        fileName: 'bot.js'
+    });
+}
     
 
                     
