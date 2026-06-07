@@ -342,54 +342,45 @@ else if (command === 'shorturl') {
 
 
 
-
-    
-
-
 else if (command === 'pair') {
-    if (!args[0]) return await EliteProTech.sendMessage(sender, { text: `Usage: pair <number>` + POWERED_BY, contextInfo: context });
+    if (!args[0]) {
+        return await EliteProTech.sendMessage(sender, {
+            text: '❌ Usage: .pair 234XXXXXXXXXX' + POWERED_BY,
+            contextInfo: context
+        });
+    }
 
     const num = args[0].replace(/[^0-9]/g, '');
-    const id = EliteProTechId();
-    const sessionsFile = path.join(__dirname, "sessions.json");
-    const sessionDir = path.join(__dirname, "sessions");
 
-    await EliteProTech.sendMessage(sender, { text: `🔄 Generating pairing code for ${num}...\n📁 Session: \`${id}\`` + POWERED_BY, contextInfo: context });
+    try {
+        await EliteProTech.sendMessage(sender, {
+            text: '🔄 Generating pairing code...' + POWERED_BY,
+            contextInfo: context
+        });
 
-    (async () => {
-        try {
-            const { version } = await fetchLatestBaileysVersion();
-            const { state, saveCreds } = await useMultiFileAuthState(path.join(sessionDir, id));
-            const sock = EliteProTechConnect({ version, auth: state, printQRInTerminal: false, logger: pino({ level: "fatal" }), browser: Browsers.macOS("Safari") });
-            sock.ev.on('creds.update', saveCreds);
+        const code = await EliteProTech.requestPairingCode(num);
 
-            let codeSent = false;
-            sock.ev.on("connection.update", async (s) => {
-                if (s.connection === "open" &&!codeSent) {
-                    let sessions = fs.existsSync(sessionsFile)? JSON.parse(fs.readFileSync(sessionsFile)) : [];
-                    if (!sessions.includes(id)) {
-                        sessions.push(id);
-                        fs.writeFileSync(sessionsFile, JSON.stringify(sessions, null, 2));
-                    }
-                    await EliteProTech.sendMessage(sender, { text: `✅ Paired & added to main bot\n📁 Session: \`${id}\`` + POWERED_BY, contextInfo: context });
-                }
-                if (s.qr &&!state.creds.registered &&!codeSent) {
-                    try {
-                        await delay(2000);
-                        const code = await sock.requestPairingCode(num);
-                        codeSent = true;
-                        await EliteProTech.sendMessage(sender, { text: `✅ *Pairing Code:* ${code}\n📱 ${num}\n📁 Session: \`${id}\`\n\nWhatsApp → Linked Devices → Link with code` + POWERED_BY, contextInfo: context });
-                    } catch (e) {
-                        await EliteProTech.sendMessage(sender, { text: `❌ QR refs attempts ended\nWhatsApp blocked pairing codes. Wait 5-10 mins, restart bot, then try again.` + POWERED_BY, contextInfo: context });
-                        sock.logout();
-                    }
-                }
-            });
-        } catch (err) {
-            await EliteProTech.sendMessage(sender, { text: `❌ Failed: ${err.message}` + POWERED_BY, contextInfo: context });
-        }
-    })();
-                    }
+        await EliteProTech.sendMessage(sender, {
+            text:
+`✅ *PAIRING CODE*
+
+📱 Number: ${num}
+🔑 Code: ${code}
+
+WhatsApp → Linked Devices → Link with phone number` + POWERED_BY,
+            contextInfo: context
+        });
+
+    } catch (err) {
+        console.error(err);
+
+        await EliteProTech.sendMessage(sender, {
+            text: `❌ Failed: ${err.message}` + POWERED_BY,
+            contextInfo: context
+        });
+    }
+}
+    
 
 
 
