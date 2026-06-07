@@ -149,7 +149,8 @@ EliteProTech.ev.on('connection.update', async (update) => {
                 }
                 const args = text.split(' ').slice(1);
 
-                const isOwner = OWNERS.includes(sender);
+                const userJid = msg.key.participant || sender;
+const isOwner = OWNERS.includes(userJid);
                 
                 // Mode Check
 
