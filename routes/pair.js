@@ -428,6 +428,63 @@ else if (['tiktok', 'tt', 'tiktokdl', 'tiktoknowm', 'tiktokvid', 'ttdl', 'tiktok
 
 
 
+
+// ================= TAGALL =================
+else if (command === 'tagall') {
+    if (!sender.endsWith('@g.us')) {
+        return EliteProTech.sendMessage(sender, {
+            text: '❌ Group only command!' + POWERED_BY,
+            contextInfo: context
+        });
+    }
+
+    const groupMetadata = await EliteProTech.groupMetadata(sender);
+    const participants = groupMetadata.participants;
+
+    let text = `📢 *TAG ALL*\n\n`;
+    let mentions = [];
+
+    for (let member of participants) {
+        mentions.push(member.id);
+        text += `➤ @${member.id.split('@')[0]}\n`;
+    }
+
+    await EliteProTech.sendMessage(sender, {
+        text,
+        mentions,
+        contextInfo: context
+    });
+}
+
+// ================= HIDETAG =================
+else if (command === 'hidetag') {
+    if (!sender.endsWith('@g.us')) {
+        return EliteProTech.sendMessage(sender, {
+            text: '❌ Group only command!' + POWERED_BY,
+            contextInfo: context
+        });
+    }
+
+    const groupMetadata = await EliteProTech.groupMetadata(sender);
+    const participants = groupMetadata.participants;
+
+    const mentions = participants.map(p => p.id);
+
+    const message = args.length
+        ? args.join(' ')
+        : '📢 Hidden Tag Message';
+
+    await EliteProTech.sendMessage(sender, {
+        text: message,
+        mentions,
+        contextInfo: context
+    });
+}
+
+
+
+
+    
     
 else if (command === 'vbook') {
     if (!args[0]) return await EliteProTech.sendMessage(sender, { text: "Usage: `vbook <prompt>`" + POWERED_BY });
