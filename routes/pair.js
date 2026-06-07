@@ -271,24 +271,24 @@ const isOwner = OWNERS.includes(userJid);
                     else if (command === 'img' || command === 'image') {
     if (!args.length) {
         return await EliteProTech.sendMessage(sender, {
-            text: '❌ Usage: .img <prompt>\nExample: .img cat riding a bike' + POWERED_BY,
+            text: '❌ Usage: .img <search>\nExample: .img cat' + POWERED_BY,
             contextInfo: context
         });
     }
 
-    const prompt = args.join(' ');
+    const query = args.join(' ');
 
     try {
         await EliteProTech.sendMessage(sender, {
-            text: '🎨 Generating image...' + POWERED_BY,
+            text: '🔍 Searching for image...' + POWERED_BY,
             contextInfo: context
         });
 
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`;
+        const imageUrl = `https://source.unsplash.com/1600x900/?${encodeURIComponent(query)}`;
 
         await EliteProTech.sendMessage(sender, {
             image: { url: imageUrl },
-            caption: `🖼️ Prompt: ${prompt}` + POWERED_BY,
+            caption: `🖼️ Result for: ${query}` + POWERED_BY,
             contextInfo: context
         });
 
@@ -296,33 +296,14 @@ const isOwner = OWNERS.includes(userJid);
         console.error(err);
 
         await EliteProTech.sendMessage(sender, {
-            text: '❌ Failed to generate image.' + POWERED_BY,
+            text: '❌ Failed to fetch image.' + POWERED_BY,
             contextInfo: context
         });
     }
-                    }    
-                        
+                    }
 
 
 
-
-else if (command === 'qr') {
-    if (!args.length) {
-        return await EliteProTech.sendMessage(sender, {
-            text: '❌ Usage: .qr <text or link>' + POWERED_BY,
-            contextInfo: context
-        });
-    }
-
-    const text = args.join(' ');
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(text)}`;
-
-    await EliteProTech.sendMessage(sender, {
-        image: { url: qrUrl },
-        caption: `📱 QR Code Generated\n\n${text}` + POWERED_BY,
-        contextInfo: context
-    });
-}
 
 
 
