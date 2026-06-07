@@ -264,32 +264,33 @@ const isOwner = OWNERS.includes(userJid);
 
 
 
-else if (command === 'img' || command === 'image' || command === 'aiimg') {
-    if (!args[0]) return await EliteProTech.sendMessage(sender, {
-        text: `❌ Give me a prompt.\nExample: img a cat riding a bike` + POWERED_BY,
-        contextInfo: context
-    });
-
-    const prompt = args.join(' ');
-    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`;
-
-    try {
-        await EliteProTech.sendMessage(sender, {
-            image: await (await fetch(url)).buffer(),
-            caption: `🎨 ${prompt}` + POWERED_BY,
-            contextInfo: context
-        });
-    } catch (err) {
-        await EliteProTech.sendMessage(sender, {
-            text: `❌ Failed to generate image: ${err.message}` + POWERED_BY,
-            contextInfo: context
-        });
-    }
-}
 
                         
 
 
+
+
+else if (command === 'qr') {
+    if (!args.length) {
+        return await EliteProTech.sendMessage(sender, {
+            text: '❌ Usage: .qr <text or link>' + POWERED_BY,
+            contextInfo: context
+        });
+    }
+
+    const text = args.join(' ');
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(text)}`;
+
+    await EliteProTech.sendMessage(sender, {
+        image: { url: qrUrl },
+        caption: `📱 QR Code Generated\n\n${text}` + POWERED_BY,
+        contextInfo: context
+    });
+}
+
+
+
+    
 
 
 else if (command === 'pair') {
