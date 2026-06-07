@@ -597,34 +597,6 @@ else if (command === 'vbook') {
 
 
 
-    if (cmd === "ssweb") {
-    const text = args.join(" ");
-
-    if (!text) {
-        return sock.sendMessage(sender, {
-            text: "❌ Usage: #ssweb https://example.com"
-        });
-    }
-
-    const url = text.startsWith("http") ? text : `https://${text}`;
-
-    try {
-        // safer screenshot API
-        const ss = `https://image.thum.io/get/png/fullpage/${url}`;
-
-        await sock.sendMessage(sender, {
-            image: { url: ss },
-            caption: `📸 Screenshot:\n${url}`
-        });
-
-    } catch (err) {
-        console.log(err);
-        await sock.sendMessage(sender, {
-            text: "❌ Failed to generate screenshot."
-        });
-    }
-         }
-    
     
         
                         
