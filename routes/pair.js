@@ -338,6 +338,50 @@ else if (command === 'pair') {
     })();
                     }
 
+
+
+
+else if (command === 'sticker' || command === 's') {
+    try {
+        const quoted = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+
+        if (!quoted || !quoted.imageMessage) {
+            return await EliteProTech.sendMessage(sender, {
+                text: '❌ Reply to an image with .sticker' + POWERED_BY,
+                contextInfo: context
+            });
+        }
+
+        const mediaMsg = {
+            key: {
+                remoteJid: sender,
+                id: msg.message.extendedTextMessage.contextInfo.stanzaId
+            },
+            message: quoted
+        };
+
+        const buffer = await downloadMediaMessage(
+            mediaMsg,
+            'buffer',
+            {},
+            {}
+        );
+
+        await EliteProTech.sendMessage(sender, {
+            sticker: buffer,
+            contextInfo: context
+        });
+
+    } catch (err) {
+        console.error(err);
+
+        await EliteProTech.sendMessage(sender, {
+            text: '❌ Failed to create sticker.' + POWERED_BY,
+            contextInfo: context
+        });
+    }
+            }
+
     
 
                         
