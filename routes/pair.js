@@ -266,6 +266,42 @@ const isOwner = OWNERS.includes(userJid);
 
 
 
+else if (command === 'shorturl') {
+    if (!args[0]) {
+        return await EliteProTech.sendMessage(sender, {
+            text: '❌ Usage: .shorturl <link>\nExample: .shorturl https://google.com' + POWERED_BY,
+            contextInfo: context
+        });
+    }
+
+    try {
+        let url = args[0];
+
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            url = 'https://' + url;
+        }
+
+        const response = await axios.get(
+            `https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`
+        );
+
+        await EliteProTech.sendMessage(sender, {
+            text: `🔗 *URL Shortener*\n\n🌐 Original:\n${url}\n\n✂️ Shortened:\n${response.data}` + POWERED_BY,
+            contextInfo: context
+        });
+
+    } catch (err) {
+        console.error(err);
+
+        await EliteProTech.sendMessage(sender, {
+            text: '❌ Failed to shorten URL.' + POWERED_BY,
+            contextInfo: context
+        });
+    }
+}
+                        
+
+
 
 
                     else if (command === 'img' || command === 'image') {
