@@ -265,6 +265,42 @@ const isOwner = OWNERS.includes(userJid);
 
 
 
+
+
+
+                    else if (command === 'img' || command === 'image') {
+    if (!args.length) {
+        return await EliteProTech.sendMessage(sender, {
+            text: '❌ Usage: .img <prompt>\nExample: .img cat riding a bike' + POWERED_BY,
+            contextInfo: context
+        });
+    }
+
+    const prompt = args.join(' ');
+
+    try {
+        await EliteProTech.sendMessage(sender, {
+            text: '🎨 Generating image...' + POWERED_BY,
+            contextInfo: context
+        });
+
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`;
+
+        await EliteProTech.sendMessage(sender, {
+            image: { url: imageUrl },
+            caption: `🖼️ Prompt: ${prompt}` + POWERED_BY,
+            contextInfo: context
+        });
+
+    } catch (err) {
+        console.error(err);
+
+        await EliteProTech.sendMessage(sender, {
+            text: '❌ Failed to generate image.' + POWERED_BY,
+            contextInfo: context
+        });
+    }
+                    }    
                         
 
 
