@@ -597,44 +597,35 @@ else if (command === 'vbook') {
 
 
 
-    else if (command === 'ssweb') {
-    if (!args[0]) {
-        return await EliteProTech.sendMessage(sender, {
-            text: '📸 Usage: .ssweb https://example.com' + POWERED_BY,
-            contextInfo: context
+    if (cmd === "ssweb") {
+    const text = args.join(" ");
+
+    if (!text) {
+        return sock.sendMessage(sender, {
+            text: "❌ Usage: #ssweb https://example.com"
         });
     }
 
-    let url = args[0];
-
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        url = 'https://' + url;
-    }
+    const url = text.startsWith("http") ? text : `https://${text}`;
 
     try {
-        await EliteProTech.sendMessage(sender, {
-            text: '📸 Taking screenshot...' + POWERED_BY,
-            contextInfo: context
-        });
+        // safer screenshot API
+        const ss = `https://image.thum.io/get/png/fullpage/${url}`;
 
-        const screenshotUrl =
-            `https://image.thum.io/get/fullpage/${encodeURIComponent(url)}`;
-
-        await EliteProTech.sendMessage(sender, {
-            image: { url: screenshotUrl },
-            caption: `✅ Screenshot of:\n${url}` + POWERED_BY,
-            contextInfo: context
+        await sock.sendMessage(sender, {
+            image: { url: ss },
+            caption: `📸 Screenshot:\n${url}`
         });
 
     } catch (err) {
-        console.error(err);
-
-        await EliteProTech.sendMessage(sender, {
-            text: '❌ Failed to capture website screenshot.' + POWERED_BY,
-            contextInfo: context
+        console.log(err);
+        await sock.sendMessage(sender, {
+            text: "❌ Failed to generate screenshot."
         });
     }
-    }
+         }
+    
+    
         
                         
 
