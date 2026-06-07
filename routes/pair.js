@@ -452,48 +452,43 @@ else if (command === 'vbook') {
 
 
     else if (command === 'ssweb') {
-                    if (!args[0]) {
-                        return await EliteProTech.sendMessage(sender, { 
-                            text: 'Usage: ssweb <url>\nExample: ssweb https://google.com' + POWERED_BY,
-                            contextInfo: context 
-                        });
-                    }
+    if (!args[0]) {
+        return await EliteProTech.sendMessage(sender, {
+            text: '📸 Usage: .ssweb https://example.com' + POWERED_BY,
+            contextInfo: context
+        });
+    }
 
-                    let url = args[0].trim();
-                    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                        url = 'https://' + url;
-                    }
+    let url = args[0];
 
-                    await EliteProTech.sendMessage(sender, { 
-                        text: '📸 Taking screenshot of the website...' + POWERED_BY,
-                        contextInfo: context 
-                    });
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+    }
 
-                    try {
-                        // Using thum.io - reliable free screenshot service
-                        const apiUrl = `https://image.thum.io/get/width/1280/crop/800/fullpage/noanimate/${encodeURIComponent(url)}`;
-                        
-                        const res = await axios.get(apiUrl, { 
-                            responseType: 'arraybuffer',
-                            timeout: 30000 
-                        });
+    try {
+        await EliteProTech.sendMessage(sender, {
+            text: '📸 Taking screenshot...' + POWERED_BY,
+            contextInfo: context
+        });
 
-                        const buffer = Buffer.from(res.data);
+        const screenshotUrl =
+            `https://image.thum.io/get/fullpage/${encodeURIComponent(url)}`;
 
-                        await EliteProTech.sendMessage(sender, {
-                            image: buffer,
-                            caption: `📸 *Website Screenshot*\n\n🔗 ${url}` + POWERED_BY,
-                            contextInfo: context
-                        });
+        await EliteProTech.sendMessage(sender, {
+            image: { url: screenshotUrl },
+            caption: `✅ Screenshot of:\n${url}` + POWERED_BY,
+            contextInfo: context
+        });
 
-                    } catch (err) {
-                        console.error('SSWEB Error:', err.message);
-                        await EliteProTech.sendMessage(sender, { 
-                            text: '❌ Failed to take screenshot.\nThe website may be blocking screenshots or is invalid.' + POWERED_BY,
-                            contextInfo: context 
-                        });
-                    }
-                    }
+    } catch (err) {
+        console.error(err);
+
+        await EliteProTech.sendMessage(sender, {
+            text: '❌ Failed to capture website screenshot.' + POWERED_BY,
+            contextInfo: context
+        });
+    }
+    }
         
                         
 
