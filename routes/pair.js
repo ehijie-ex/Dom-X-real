@@ -343,43 +343,47 @@ else if (command === 'shorturl') {
 
 
 else if (command === 'pair') {
-    if (!args[0]) {
+    if (!isGroup) {
         return await EliteProTech.sendMessage(sender, {
-            text: '❌ Usage: .pair 234XXXXXXXXXX' + POWERED_BY,
+            text: '❌ This command only works in groups!' + POWERED_BY,
             contextInfo: context
         });
     }
 
-    const num = args[0].replace(/[^0-9]/g, '');
+    const metadata = await EliteProTech.groupMetadata(sender);
+    let members = metadata.participants.map(p => p.id).filter(id =>!id.includes('bot')); // skip bots
 
-    try {
-        await EliteProTech.sendMessage(sender, {
-            text: '🔄 Generating pairing code...' + POWERED_BY,
-            contextInfo: context
-        });
-
-        const code = await EliteProTech.requestPairingCode(num);
-
-        await EliteProTech.sendMessage(sender, {
-            text:
-`✅ *PAIRING CODE*
-
-📱 Number: ${num}
-🔑 Code: ${code}
-
-WhatsApp → Linked Devices → Link with phone number` + POWERED_BY,
-            contextInfo: context
-        });
-
-    } catch (err) {
-        console.error(err);
-
-        await EliteProTech.sendMessage(sender, {
-            text: `❌ Failed: ${err.message}` + POWERED_BY,
+    if (members.length < 2) {
+        return await EliteProTech.sendMessage(sender, {
+            text: '❌ Need at least 2 people to pair' + POWERED_BY,
             contextInfo: context
         });
     }
-}
+
+    // shuffle
+    for (let i = members.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [members[i], members[j]] = [members[j], members[i]];
+    }
+
+    let pairs = [];
+    for (let i = 0; i < members.length - 1; i += 2) {
+        pairs.push(`@${members[i].split('@')[0]} + @${members[i+1].split('@')[0]}`);
+    }
+
+    let leftover = '';
+    if (members.length % 2!== 0) {
+        leftover = `\n\n🚶 @${members[members.length-1].split('@')[0]} sits this one out`;
+    }
+
+    let text = `💞 *Random Pairs*\n\n${pairs.join('\n')}${leftover}` + POWERED_BY;
+
+    await EliteProTech.sendMessage(sender, {
+        text: text,
+        mentions: members,
+        contextInfo: context
+    });
+    }
     
 
 
