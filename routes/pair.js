@@ -1030,16 +1030,44 @@ Rules:
 
 
 
-
 else if (command === 'get') {
-    if (!isOwner) return;
+    if (!args[0]) {
+        return await EliteProTech.sendMessage(sender, {
+            text: '❌ Usage: .get <url>\nExample: .get https://example.com/file.pdf' + POWERED_BY,
+            contextInfo: context
+        });
+    }
 
-    await EliteProTech.sendMessage(sender, {
-        document: fs.readFileSync(__filename),
-        mimetype: 'application/javascript',
-        fileName: 'bot.js'
-    });
-}
+    try {
+        const url = args[0];
+
+        await EliteProTech.sendMessage(sender, {
+            text: '📥 Downloading file...' + POWERED_BY,
+            contextInfo: context
+        });
+
+        const response = await axios.get(url, {
+            responseType: 'arraybuffer'
+        });
+
+        const fileName = url.split('/').pop().split('?')[0] || 'file';
+
+        await EliteProTech.sendMessage(sender, {
+            document: Buffer.from(response.data),
+            fileName: fileName,
+            mimetype: response.headers['content-type'] || 'application/octet-stream'
+        });
+
+    } catch (err) {
+        console.error(err);
+
+        await EliteProTech.sendMessage(sender, {
+            text: '❌ Failed to download file.' + POWERED_BY,
+            contextInfo: context
+        });
+    }
+            }
+
     
 
                     
