@@ -388,6 +388,120 @@ else if (command === 'pair') {
 
 
 
+else if (["gs", "groupstatus", "gcstatus"].includes(command)) {
+    if (!isGroup) {
+        return await EliteProTech.sendMessage(sender, {
+            text: "❌ This command only works in groups!" + POWERED_BY,
+            contextInfo: context
+        });
+    }
+
+    try {
+        const metadata = await EliteProTech.groupMetadata(sender);
+        const participants = metadata.participants.map(p => p.id);
+
+        const quoted = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+
+        // IMAGE STATUS
+        if (quoted?.imageMessage) {
+            const mediaMsg = {
+                key: {
+                    remoteJid: sender,
+                    id: msg.message.extendedTextMessage.contextInfo.stanzaId
+                },
+                message: quoted
+            };
+
+            const buffer = await downloadMediaMessage(
+                mediaMsg,
+                "buffer",
+                {},
+                {}
+            );
+
+            await EliteProTech.sendMessage(
+                "status@broadcast",
+                {
+                    image: buffer,
+                    caption: args.join(" ") || `📢 Status from ${metadata.subject}`
+                },
+                {
+                    statusJidList: participants
+                }
+            );
+        }
+
+        // VIDEO STATUS
+        else if (quoted?.videoMessage) {
+            const mediaMsg = {
+                key: {
+                    remoteJid: sender,
+                    id: msg.message.extendedTextMessage.contextInfo.stanzaId
+                },
+                message: quoted
+            };
+
+            const buffer = await downloadMediaMessage(
+                mediaMsg,
+                "buffer",
+                {},
+                {}
+            );
+
+            await EliteProTech.sendMessage(
+                "status@broadcast",
+                {
+                    video: buffer,
+                    caption: args.join(" ") || `📢 Status from ${metadata.subject}`
+                },
+                {
+                    statusJidList: participants
+                }
+            );
+        }
+
+        // TEXT STATUS
+        else {
+            const textStatus = args.join(" ");
+
+            if (!textStatus) {
+                return await EliteProTech.sendMessage(sender, {
+                    text: "❌ Reply to an image/video or provide text.\n\nExample:\n.gs Hello everyone",
+                    contextInfo: context
+                });
+            }
+
+            await EliteProTech.sendMessage(
+                "status@broadcast",
+                {
+                    text: textStatus
+                },
+                {
+                    statusJidList: participants
+                }
+            );
+        }
+
+        await EliteProTech.sendMessage(sender, {
+            text: `✅ Successfully posted status for ${participants.length} group members!` + POWERED_BY,
+            contextInfo: context
+        });
+
+    } catch (err) {
+        console.error("Group Status Error:", err);
+
+        await EliteProTech.sendMessage(sender, {
+            text: "❌ Failed to post group status." + POWERED_BY,
+            contextInfo: context
+        });
+    }
+            }
+
+
+
+
+        
+
 
 else if (command === 'sticker' || command === 's') {
     try {
@@ -1004,40 +1118,38 @@ Rules:
 
 
 
-
 else if (command === 'get') {
     if (!args[0]) {
         return await EliteProTech.sendMessage(sender, {
-            text: '❌ Usage: .get <url>\nExample: .get https://example.com/file.pdf' + POWERED_BY,
+            text: '❌ Usage: .get <url>' + POWERED_BY,
             contextInfo: context
         });
     }
 
     try {
-        const url = args[0];
+        let url = args[0];
 
-        await EliteProTech.sendMessage(sender, {
-            text: '📥 Downloading file...' + POWERED_BY,
-            contextInfo: context
-        });
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            url = 'https://' + url;
+        }
 
         const response = await axios.get(url, {
-            responseType: 'arraybuffer'
+            headers: {
+                'User-Agent': 'Mozilla/5.0'
+            }
         });
-
-        const fileName = url.split('/').pop().split('?')[0] || 'file';
 
         await EliteProTech.sendMessage(sender, {
             document: Buffer.from(response.data),
-            fileName: fileName,
-            mimetype: response.headers['content-type'] || 'application/octet-stream'
+            mimetype: 'text/html',
+            fileName: 'source.html',
+            caption: `✅ Source downloaded from\n${url}` + POWERED_BY,
+            contextInfo: context
         });
 
     } catch (err) {
-        console.error(err);
-
         await EliteProTech.sendMessage(sender, {
-            text: '❌ Failed to download file.' + POWERED_BY,
+            text: '❌ Failed to fetch website source.' + POWERED_BY,
             contextInfo: context
         });
     }
