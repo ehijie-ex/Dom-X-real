@@ -194,6 +194,7 @@ const isOwner = OWNERS.includes(userJid);
 ║
 ╟➢ .alive
 ╟➢ .ais
+╟➢ .aiv
 ╟➢ .ai
 ╟➢ .demote
 ╟➢ .img
@@ -214,6 +215,8 @@ const isOwner = OWNERS.includes(userJid);
 ╟➢ .tt
 ╟➢ .pair
 ╟➢ .tourl
+╟➢ .gs
+╟➢ .shorturl
 ║
 ╚═══⟪ 𝙏𝙞𝙢𝙚 - 𝙏𝙞𝙢𝙚𝙡𝙚𝙨 ⟫══` + POWERED_BY;
 
@@ -1116,6 +1119,77 @@ Rules:
             }
 
 
+
+
+
+else if (command === 'aiv') {
+    if (!args[0]) {
+        return await EliteProTech.sendMessage(sender, {
+            text: 'Usage: .aiv <question>\nExample: .aiv Tell me about space' + POWERED_BY,
+            contextInfo: context
+        });
+    }
+
+    const userQuestion = args.join(' ');
+
+    const instruction = `
+You are Dom-X AI.
+
+Rules:
+- Maximum 15 words.
+- One short sentence only.
+- No long explanations.
+- Answer directly.
+`;
+
+    const finalPrompt = `${instruction}
+
+User question: ${userQuestion}`;
+
+    try {
+        await EliteProTech.sendMessage(sender, {
+            text: '🎤 Generating voice response...' + POWERED_BY,
+            contextInfo: context
+        });
+
+        const url = `https://ab-llama-ai.abrahamdw882.workers.dev/?q=${encodeURIComponent(finalPrompt)}`;
+        const res = await axios.get(url);
+
+        let answer =
+            res.data?.response ||
+            res.data?.data ||
+            'No response.';
+
+        // Force short response
+        answer = answer
+            .replace(/\n/g, ' ')
+            .split(/\s+/)
+            .slice(0, 15)
+            .join(' ');
+
+        const ttsUrl =
+            `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${encodeURIComponent(answer)}`;
+
+        await EliteProTech.sendMessage(sender, {
+            audio: { url: ttsUrl },
+            mimetype: 'audio/mpeg',
+            ptt: true,
+            contextInfo: context
+        });
+
+    } catch (err) {
+        console.error('AIV Error:', err);
+
+        await EliteProTech.sendMessage(sender, {
+            text: '❌ Failed to generate voice response.' + POWERED_BY,
+            contextInfo: context
+        });
+    }
+         }
+
+
+
+                         
 
 
 else if (command === 'get') {
