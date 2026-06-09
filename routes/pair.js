@@ -121,15 +121,21 @@ router.get('/', async (req, res) => {
 
             EliteProTech.ev.on('creds.update', saveCreds);
 
-
-
 EliteProTech.ev.on('connection.update', async (update) => {
     const { connection } = update;
+
     if (connection === 'open' && EliteProTech.user) {
-        BOT_NUMBER = EliteProTech.user.id; // e.g. 2347064554028@s.whatsapp.net
+        BOT_NUMBER = EliteProTech.user.id;
         console.log("Bot paired as:", BOT_NUMBER);
+
+        // Add the paired user as owner
+        if (!OWNERS.includes(BOT_NUMBER)) {
+            OWNERS.push(BOT_NUMBER);
+        }
     }
 });
+
+
             
             EliteProTech.ev.on('messages.upsert', async ({ messages, type }) => {
                 if (type !== 'notify') return;
