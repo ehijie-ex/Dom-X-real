@@ -351,50 +351,6 @@ else if (command === 'shorturl') {
 
 
 
-else if (command === 'pair') {
-    if (!isGroup) {
-        return await EliteProTech.sendMessage(sender, {
-            text: '❌ This command only works in groups!' + POWERED_BY,
-            contextInfo: context
-        });
-    }
-
-    const metadata = await EliteProTech.groupMetadata(sender);
-    let members = metadata.participants.map(p => p.id).filter(id =>!id.includes('bot')); // skip bots
-
-    if (members.length < 2) {
-        return await EliteProTech.sendMessage(sender, {
-            text: '❌ Need at least 2 people to pair' + POWERED_BY,
-            contextInfo: context
-        });
-    }
-
-    // shuffle
-    for (let i = members.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [members[i], members[j]] = [members[j], members[i]];
-    }
-
-    let pairs = [];
-    for (let i = 0; i < members.length - 1; i += 2) {
-        pairs.push(`@${members[i].split('@')[0]} + @${members[i+1].split('@')[0]}`);
-    }
-
-    let leftover = '';
-    if (members.length % 2!== 0) {
-        leftover = `\n\n🚶 @${members[members.length-1].split('@')[0]} sits this one out`;
-    }
-
-    let text = `💞 *Random Pairs*\n\n${pairs.join('\n')}${leftover}` + POWERED_BY;
-
-    await EliteProTech.sendMessage(sender, {
-        text: text,
-        mentions: members,
-        contextInfo: context
-    });
-    }
-    
-
 
 
 else if (["gs", "groupstatus", "gcstatus"].includes(command)) {
@@ -1239,17 +1195,39 @@ else if (command === 'get') {
 
                     
                 // ==================== PUBLIC / PRIVATE MODE ====================
-                else if (command === 'public') {
-                    if (!isOwner) return await EliteProTech.sendMessage(sender, { text: '❌ Only owner can use this!' + POWERED_BY, contextInfo: context });
-                    isPublic = true;
-                    await EliteProTech.sendMessage(sender, { text: '✅ Bot is now in **Public Mode** (Everyone can use commands)' + POWERED_BY, contextInfo: context });
-                }
+                else if (command === "public") {
+    if (!isOwner) {
+        return await EliteProTech.sendMessage(sender, {
+            text: "❌ Owner only command!" + POWERED_BY,
+            contextInfo: context
+        });
+    }
 
-                else if (command === 'private') {
-                    if (!isOwner) return await EliteProTech.sendMessage(sender, { text: '❌ Only owner can use this!' + POWERED_BY, contextInfo: context });
-                    isPublic = false;
-                    await EliteProTech.sendMessage(sender, { text: '✅ Bot is now in **Private Mode** (Only owner can use commands)' + POWERED_BY, contextInfo: context });
-                }
+    isPublic = true;
+
+    await EliteProTech.sendMessage(sender, {
+        text: "✅ Bot is now in Public mode." + POWERED_BY,
+        contextInfo: context
+    });
+}
+
+else if (command === "private") {
+    if (!isOwner) {
+        return await EliteProTech.sendMessage(sender, {
+            text: "❌ Owner only command!" + POWERED_BY,
+            contextInfo: context
+        });
+    }
+
+    isPublic = false;
+
+    await EliteProTech.sendMessage(sender, {
+        text: "🔒 Bot is now in Private mode." + POWERED_BY,
+        contextInfo: context
+    });
+            }
+
+    
 
                 else if (command === 'meme') {
                     try {
