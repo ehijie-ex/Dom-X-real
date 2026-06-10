@@ -208,8 +208,8 @@ const isOwner = OWNERS.includes(userJid);
 ╟➢ .vbook
 ╟➢ .menu
 ╟➢ .meme
-╟➢ .public
-╟➢ .private
+╟➢ .setname
+╟➢ .setpp
 ╟➢ .runtime
 ╟➢ .shazam 
 ╟➢ .time 
@@ -1191,11 +1191,103 @@ else if (command === 'get') {
     }
             }
 
+
+    
+else if (command === "setpp") {
+    if (!isOwner) {
+        return await EliteProTech.sendMessage(sender, {
+            text: "❌ Owner only command!" + POWERED_BY,
+            contextInfo: context
+        });
+    }
+
+    try {
+        const quoted = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+
+        if (!quoted || !quoted.imageMessage) {
+            return await EliteProTech.sendMessage(sender, {
+                text: "❌ Reply to an image with .setpp" + POWERED_BY,
+                contextInfo: context
+            });
+        }
+
+        const mediaMsg = {
+            key: {
+                remoteJid: sender,
+                id: msg.message.extendedTextMessage.contextInfo.stanzaId
+            },
+            message: quoted
+        };
+
+        const buffer = await downloadMediaMessage(
+            mediaMsg,
+            "buffer",
+            {},
+            {}
+        );
+
+        await EliteProTech.updateProfilePicture(
+            EliteProTech.user.id,
+            buffer
+        );
+
+        await EliteProTech.sendMessage(sender, {
+            text: "✅ Profile picture updated successfully!" + POWERED_BY,
+            contextInfo: context
+        });
+
+    } catch (err) {
+        console.error("SetPP Error:", err);
+
+        await EliteProTech.sendMessage(sender, {
+            text: "❌ Failed to update profile picture." + POWERED_BY,
+            contextInfo: context
+        });
+    }
+}
+
+    else if (command === "setname") {
+    if (!isOwner) {
+        return await EliteProTech.sendMessage(sender, {
+            text: "❌ Owner only command!" + POWERED_BY,
+            contextInfo: context
+        });
+    }
+
+    if (!args.length) {
+        return await EliteProTech.sendMessage(sender, {
+            text: "❌ Usage: .setname <new name>\nExample: .setname Dom-X MD",
+            contextInfo: context
+        });
+    }
+
+    try {
+        const newName = args.join(" ");
+
+        await EliteProTech.updateProfileName(newName);
+
+        await EliteProTech.sendMessage(sender, {
+            text: `✅ Bot name changed to:\n${newName}` + POWERED_BY,
+            contextInfo: context
+        });
+
+    } catch (err) {
+        console.error("Setname Error:", err);
+
+        await EliteProTech.sendMessage(sender, {
+            text: "❌ Failed to change bot name." + POWERED_BY,
+            contextInfo: context
+        });
+    }
+            }
+
+
+            
     
 
                     
                 // ==================== PUBLIC / PRIVATE MODE ====================
-                else if (command === "public") {
+                else if (command === "ppp") {
     if (!isOwner) {
         return await EliteProTech.sendMessage(sender, {
             text: "❌ Owner only command!" + POWERED_BY,
@@ -1211,7 +1303,7 @@ else if (command === 'get') {
     });
 }
 
-else if (command === "private") {
+else if (command === "fff") {
     if (!isOwner) {
         return await EliteProTech.sendMessage(sender, {
             text: "❌ Owner only command!" + POWERED_BY,
