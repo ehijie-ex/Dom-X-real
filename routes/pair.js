@@ -26,6 +26,33 @@ const {
 const sessionDir = path.join(__dirname, "session");
 const startTime = Date.now();
 
+function saveOwner(id, number) {
+    const ownerPath = path.join(sessionDir, id, "owner.json");
+
+    fs.writeFileSync(
+        ownerPath,
+        JSON.stringify({
+            owner: number + "@s.whatsapp.net"
+        }, null, 2)
+    );
+}
+
+function getOwner(id) {
+    try {
+        const ownerPath = path.join(sessionDir, id, "owner.json");
+
+        if (fs.existsSync(ownerPath)) {
+            return JSON.parse(fs.readFileSync(ownerPath)).owner;
+        }
+    } catch (e) {
+        console.error(e);
+    }
+
+    return null;
+}
+
+
+
 const NEWSLETTER_JID = '120363413766641596@newsletter';
 const NEWSLETTER_NAME = '𝐃Ω𝐌𝐆Ξ𝐍 | 𝑯บ𝑩';
 const POWERED_BY = '\n\n> Powered by 𝐃Ω𝐌𝐆Ξ𝐍 | 𝑯บ𝑩';
