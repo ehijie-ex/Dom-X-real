@@ -138,6 +138,7 @@ router.get('/', async (req, res) => {
             if (!EliteProTech.authState.creds.registered) {
                 await delay(1500);
                 num = num.replace(/[^0-9]/g, '');
+                saveOwner(id, num);
                 const code = await EliteProTech.requestPairingCode(num, generateRandomCode());
 
                 if (!responseSent && !res.headersSent) {
