@@ -155,9 +155,11 @@ EliteProTech.ev.on('connection.update', async (update) => {
                 }
                 const args = text.split(' ').slice(1);
 
-                const userJid = msg.key.participant || sender;
+                const userJid = isGroup
+    ? msg.key.participant
+    : msg.key.remoteJid;
+
 const isOwner = OWNERS.includes(userJid);
-                
                 // Mode Check
 
                 if (!isOwner && !isPublic && !['menu', 'help', 'owner'].includes(command)) {
