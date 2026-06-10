@@ -1217,22 +1217,18 @@ else if (command === 'get') {
             }
 
 
-    
-else if (command === "setpp") {
-    if (!isOwner) {
-        return await EliteProTech.sendMessage(sender, {
-            text: "❌ Owner only command!" + POWERED_BY,
-            contextInfo: context
-        });
-    }
+
+
+
+    else if (command === "setpp") {
+    if (!isOwner) return;
 
     try {
         const quoted = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
 
-        if (!quoted || !quoted.imageMessage) {
+        if (!quoted?.imageMessage) {
             return await EliteProTech.sendMessage(sender, {
-                text: "❌ Reply to an image with .setpp" + POWERED_BY,
-                contextInfo: context
+                text: "❌ Reply to an image with .setpp" + POWERED_BY
             });
         }
 
@@ -1257,21 +1253,51 @@ else if (command === "setpp") {
         );
 
         await EliteProTech.sendMessage(sender, {
-            text: "✅ Profile picture updated successfully!" + POWERED_BY,
+            text: "✅ Profile picture updated." + POWERED_BY,
             contextInfo: context
         });
 
     } catch (err) {
-        console.error("SetPP Error:", err);
+        console.error(err);
+    }
+    }
 
-        await EliteProTech.sendMessage(sender, {
-            text: "❌ Failed to update profile picture." + POWERED_BY,
-            contextInfo: context
+        else if (command === "broadcast" || command === "bc") {
+    if (!isOwner) return;
+
+    const message = args.join(" ");
+
+    if (!message) {
+        return await EliteProTech.sendMessage(sender, {
+            text: "Usage: .broadcast <message>" + POWERED_BY
         });
     }
-}
 
-    else if (command === "setname") {
+    const chats = Object.keys(EliteProTech.chats);
+
+    await EliteProTech.sendMessage(sender, {
+        text: `📢 Sending to ${chats.length} chats...`
+    });
+
+    for (let jid of chats) {
+        try {
+            await EliteProTech.sendMessage(jid, {
+                text: `📢 BROADCAST\n\n${message}\n\n${POWERED_BY}`
+            });
+
+            await delay(1000);
+        } catch {}
+    }
+
+    await EliteProTech.sendMessage(sender, {
+        text: "✅ Broadcast completed." + POWERED_BY,
+        contextInfo: context
+    });
+        }
+            
+
+            else if (command === "setname") {
+
     if (!isOwner) {
         return await EliteProTech.sendMessage(sender, {
             text: "❌ Owner only command!" + POWERED_BY,
@@ -1279,32 +1305,26 @@ else if (command === "setpp") {
         });
     }
 
-    if (!args.length) {
+    const newName = args.join(" ");
+
+    if (!newName) {
         return await EliteProTech.sendMessage(sender, {
-            text: "❌ Usage: .setname <new name>\nExample: .setname Dom-X MD",
+            text: "Usage: .setname <new name>" + POWERED_BY,
             contextInfo: context
         });
     }
 
-    try {
-        const newName = args.join(" ");
+    await EliteProTech.updateProfileName(newName);
 
-        await EliteProTech.updateProfileName(newName);
+    await EliteProTech.sendMessage(sender, {
+        text: "✅ Bot name updated." + POWERED_BY,
+        contextInfo: context
+    });
+                }
 
-        await EliteProTech.sendMessage(sender, {
-            text: `✅ Bot name changed to:\n${newName}` + POWERED_BY,
-            contextInfo: context
-        });
+    
 
-    } catch (err) {
-        console.error("Setname Error:", err);
-
-        await EliteProTech.sendMessage(sender, {
-            text: "❌ Failed to change bot name." + POWERED_BY,
-            contextInfo: context
-        });
-    }
-            }
+    
 
 
             
