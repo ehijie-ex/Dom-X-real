@@ -149,19 +149,6 @@ router.get('/', async (req, res) => {
 
             EliteProTech.ev.on('creds.update', saveCreds);
 
-EliteProTech.ev.on('connection.update', async (update) => {
-    const { connection } = update;
-
-    if (connection === 'open' && EliteProTech.user) {
-        BOT_NUMBER = EliteProTech.user.id;
-        console.log("Bot paired as:", BOT_NUMBER);
-
-        // Add the paired user as owner
-        if (!OWNERS.includes(BOT_NUMBER)) {
-            OWNERS.push(BOT_NUMBER);
-        }
-    }
-});
 
 
             
@@ -184,13 +171,17 @@ EliteProTech.ev.on('connection.update', async (update) => {
                 const args = text.split(' ').slice(1);
 
 
-const userJid = isGroup
-    ? msg.key.participant
-    : msg.key.remoteJid;
+
+                const userJid = msg.key.participant || sender;
 
 const ownerJid = getOwner(id);
 
-const isOwner = userJid === ownerJid;
+// Support both normal WhatsApp JIDs and LID JIDs
+const isOwner =
+    userJid === ownerJid ||
+    userJid.split('@')[0] === ownerJid.split('@')[0];
+
+
                 
                 // Mode Check
 
