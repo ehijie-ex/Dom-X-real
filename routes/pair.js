@@ -172,16 +172,16 @@ router.get('/', async (req, res) => {
 
 
 
-                const userJid = msg.key.participant || sender;
+                const userJid = isGroup
+    ? (msg.key.participant || sender)
+    : sender;
 
 const ownerJid = getOwner(id);
 
-// Support both normal WhatsApp JIDs and LID JIDs
+// Support both @s.whatsapp.net and @lid
 const isOwner =
     userJid === ownerJid ||
     userJid.split('@')[0] === ownerJid.split('@')[0];
-
-
                 
                 // Mode Check
 
