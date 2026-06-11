@@ -1158,12 +1158,11 @@ User question: ${userQuestion}`;
             `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${encodeURIComponent(answer)}`;
 
         await EliteProTech.sendMessage(sender, {
-            audio: { url: ttsUrl },
-            mimetype: 'audio/mpeg',
-            ptt: true,
-            contextInfo: context
-        });
-
+    audio: { url: ttsUrl },
+    mimetype: 'audio/mpeg',
+    fileName: 'aiv.mp3',
+    contextInfo: context
+});
     } catch (err) {
         console.error('AIV Error:', err);
 
