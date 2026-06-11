@@ -230,35 +230,72 @@ const isOwner =
 
 
                     else if (command === 'menu' || command === 'help') {
-    const menu = `╔═══⟪  𝐃𝐨𝐦-𝐗 𝐕𝟐  ⟫═══╗
-║
-╟➢ .alive
-╟➢ .ais
-╟➢ .aiv
-╟➢ .ai
-╟➢ .demote
-╟➢ .img
-╟➢ .tts
-╟➢ .vbook
-╟➢ .menu
-╟➢ .meme
-╟➢ .setname
-╟➢ .setpp
-╟➢ .runtime
-╟➢ .shazam 
-╟➢ .time 
-╟➢ .tagall
-╟➢ .vv
-╟➢ .ytdl
-╟➢ .play
-╟➢ .video
-╟➢ .tt
-╟➢ .pair
-╟➢ .tourl
-╟➢ .gs
-╟➢ .shorturl
-║
-╚═══⟪ 𝙏𝙞𝙢𝙚 - 𝙏𝙞𝙢𝙚𝙡𝙚𝙨 ⟫══` + POWERED_BY;
+    const menu = `╔═══⟪ 𝐃𝐨𝐦-𝐗 𝐕𝟐 ⟫═══╗
+
+╭━━〔 🤖 MAIN MENU 〕━━⬣
+┃➢ .menu
+┃➢ .alive
+┃➢ .runtime
+┃➢ .time
+┃➢ .ping
+╰━━━━━━━━━━━━━━⬣
+
+╭━━〔 🧠 AI MENU 〕━━⬣
+┃➢ .ai
+┃➢ .ais
+┃➢ .aiv
+┃➢ .tts
+╰━━━━━━━━━━━━━━⬣
+
+╭━━〔 📥 DOWNLOAD MENU 〕━━⬣
+┃➢ .play
+┃➢ .video
+┃➢ .ytdl
+┃➢ .tt
+┃➢ .tiktok
+┃➢ .vv
+┃➢ .vbook
+╰━━━━━━━━━━━━━━⬣
+
+╭━━〔 🖼️ MEDIA MENU 〕━━⬣
+┃➢ .img
+┃➢ .meme
+┃➢ .tourl
+┃➢ .sticker
+┃➢ .shazam
+╰━━━━━━━━━━━━━━⬣
+
+╭━━〔 👥 GROUP MENU 〕━━⬣
+┃➢ .tagall
+┃➢ .hidetag
+┃➢ .promote
+┃➢ .demote
+┃➢ .pair
+┃➢ .gs
+╰━━━━━━━━━━━━━━⬣
+
+╭━━〔 ⚙️ OWNER MENU 〕━━⬣
+┃➢ .setname
+┃➢ .setpp
+┃➢ .public
+┃➢ .private
+┃➢ .restart
+┃➢ .shutdown
+┃➢ .block
+┃➢ .unblock
+┃➢ .broadcast
+╰━━━━━━━━━━━━━━⬣
+
+╭━━〔 🌐 TOOLS MENU 〕━━⬣
+┃➢ .shorturl
+┃➢ .get
+┃➢ .apk
+╰━━━━━━━━━━━━━━⬣
+
+╔══════════════╗
+║ 𝐃Ω𝐌𝐆Ξ𝐍 | 𝑯บ𝑩
+╚══════════════╝
+` + POWERED_BY;
 
     // 1. Send loading message
     const loadingMsg = await EliteProTech.sendMessage(sender, { 
