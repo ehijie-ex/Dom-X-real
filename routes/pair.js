@@ -908,7 +908,62 @@ else if (['ytmp4', 'ytvideo', 'video'].includes(command)) {
 
 
 
-                    
+
+
+else if (command === 'apk') {
+    if (!args[0]) {
+        return await EliteProTech.sendMessage(sender, {
+            text: '❌ Usage: .apk <app name>\nExample: .apk WhatsApp' + POWERED_BY,
+            contextInfo: context
+        });
+    }
+
+    try {
+        const query = args.join(' ');
+
+        await EliteProTech.sendMessage(sender, {
+            text: '🔎 Searching APK...' + POWERED_BY,
+            contextInfo: context
+        });
+
+        const { data } = await axios.get(
+            `https://api.giftedtech.web.id/api/search/apk?apikey=gifted&query=${encodeURIComponent(query)}`
+        );
+
+        if (!data.success || !data.result) {
+            return await EliteProTech.sendMessage(sender, {
+                text: '❌ No APK found.' + POWERED_BY,
+                contextInfo: context
+            });
+        }
+
+        const app = data.result;
+
+        await EliteProTech.sendMessage(sender, {
+            image: { url: app.icon },
+            caption:
+`📦 *${app.name}*
+
+📝 Package: ${app.package}
+⭐ Version: ${app.version}
+
+⬇️ Download:
+${app.download}` + POWERED_BY,
+            contextInfo: context
+        });
+
+    } catch (err) {
+        console.error(err);
+
+        await EliteProTech.sendMessage(sender, {
+            text: '❌ Failed to search APK.' + POWERED_BY,
+            contextInfo: context
+        });
+    }
+            }
+
+
+            
 
 
                     
