@@ -9,6 +9,7 @@ const path = require('path');
 const axios = require('axios');
 const yts = require('yt-search');
 const acrcloud = require('acrcloud');
+const wgcGames = {};
 
 let router = express.Router();
 const pino = require("pino");
@@ -171,6 +172,14 @@ router.get('/', async (req, res) => {
                 const args = text.split(' ').slice(1);
 
 
+////Game
+                
+
+
+
+
+
+                
 
                 const userJid = isGroup
     ? (msg.key.participant || sender)
@@ -189,7 +198,7 @@ const isOwner =
                     return; // In private mode, only owner can use commands (except menu/help/owner)
                 }
 
-                if (msg.key.fromMe && !['ping','alive','menu','help','img','meme','vv','vbook','tt','tiktok','tts','aiv','get','setname','ytdl','ytmp3','ytaudio','ssweb','pair','play','ytmp4','video','ai-search','ais','searchai','ai','ask','shazam','whatmusic','quemusica','tagall','hidetag','promote','demote','runtime','owner','time','public','private'].includes(command)) return;
+                if (msg.key.fromMe && !['ping','alive','apk','menu','help','img','meme','vv','vbook','tt','tiktok','tts','aiv','get','setname','ytdl','ytmp3','ytaudio','ssweb','pair','play','ytmp4','video','ai-search','ais','searchai','ai','ask','shazam','whatmusic','quemusica','tagall','hidetag','promote','demote','runtime','owner','time','public','private'].includes(command)) return;
 
                 const context = getContextInfo();
 
