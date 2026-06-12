@@ -10,6 +10,7 @@ const axios = require('axios');
 const yts = require('yt-search');
 const acrcloud = require('acrcloud');
 const wgcGames = {};
+const { sendInteractiveMessage } = require('gifted-btns');
 
 let router = express.Router();
 const pino = require("pino");
@@ -536,7 +537,63 @@ else if (["gs", "groupstatus", "gcstatus"].includes(command)) {
 
 
 
-        
+// ================= MENU2 =================
+else if (command === "menu2") {
+    try {
+        await EliteProTech.sendMessage(sender, {
+            text: `╭━━━〔 𝐃𝐨𝐦-𝐗 𝐕𝟐 〕━━━⬣
+┃ Tap a command below
+╰━━━━━━━━━━━━⬣`,
+            footer: "Instant commands • https://dom-x-pairing.onrender.com",
+            buttons: [
+                {
+                    buttonId: ".owner",
+                    buttonText: { displayText: "👑 Owner" },
+                    type: 1
+                },
+                {
+                    buttonId: ".bugmenu",
+                    buttonText: { displayText: "🐞 Bug Menu" },
+                    type: 1
+                },
+                {
+                    buttonId: ".mainmenu",
+                    buttonText: { displayText: "📋 Main Menu" },
+                    type: 1
+                },
+                {
+                    buttonId: ".alive",
+                    buttonText: { displayText: "💚 Alive" },
+                    type: 1
+                },
+                {
+                    buttonId: ".runtime",
+                    buttonText: { displayText: "⏱ Runtime" },
+                    type: 1
+                },
+                {
+                    buttonId: ".ping",
+                    buttonText: { displayText: "🏓 Ping" },
+                    type: 1
+                }
+            ],
+            headerType: 1,
+            contextInfo: context
+        });
+
+    } catch (err) {
+        console.error("Menu2 Error:", err);
+
+        await EliteProTech.sendMessage(sender, {
+            text: "❌ Failed to load interactive menu." + POWERED_BY,
+            contextInfo: context
+        });
+    }
+}
+
+
+
+    
 
 
 else if (command === 'sticker' || command === 's') {
