@@ -195,7 +195,7 @@ const isOwner =
                 
                 // Mode Check
 
-                if (!isOwner && !isPublic && !['menu', 'help', 'owner'].includes(command)) {
+                if (!isOwner && !isPublic && !['menu', 'menu2', 'lyrics', 'help', 'owner'].includes(command)) {
                     return; // In private mode, only owner can use commands (except menu/help/owner)
                 }
 
@@ -539,53 +539,76 @@ else if (["gs", "groupstatus", "gcstatus"].includes(command)) {
 
 // ================= MENU2 =================
 else if (command === "menu2") {
+    await sendInteractiveMessage(EliteProTech, sender, {
+        title: "Dom-X v2",
+        text: "Test buttons",
+        footer: "Dom-X",
+        interactiveButtons: [
+            {
+                name: "quick_reply",
+                buttonParamsJson: JSON.stringify({
+                    display_text: "Ping",
+                    id: ".ping"
+                })
+            },
+            {
+                name: "quick_reply",
+                buttonParamsJson: JSON.stringify({
+                    display_text: "Alive",
+                    id: ".alive"
+                })
+            }
+        ]
+    });
+}
+
+
+
+
+
+
+
+
+
+    // ================= LYRICS =================
+else if (command === "lyrics") {
+    if (!args.length) {
+        return await EliteProTech.sendMessage(sender, {
+            text: "❌ Usage: .lyrics <song name>\nExample: .lyrics Shape of You" + POWERED_BY,
+            contextInfo: context
+        });
+    }
+
     try {
+        const query = args.join(" ");
+
         await EliteProTech.sendMessage(sender, {
-            text: `╭━━━〔 𝐃𝐨𝐦-𝐗 𝐕𝟐 〕━━━⬣
-┃ Tap a command below
-╰━━━━━━━━━━━━⬣`,
-            footer: "Instant commands • https://dom-x-pairing.onrender.com",
-            buttons: [
-                {
-                    buttonId: ".owner",
-                    buttonText: { displayText: "👑 Owner" },
-                    type: 1
-                },
-                {
-                    buttonId: ".bugmenu",
-                    buttonText: { displayText: "🐞 Bug Menu" },
-                    type: 1
-                },
-                {
-                    buttonId: ".mainmenu",
-                    buttonText: { displayText: "📋 Main Menu" },
-                    type: 1
-                },
-                {
-                    buttonId: ".alive",
-                    buttonText: { displayText: "💚 Alive" },
-                    type: 1
-                },
-                {
-                    buttonId: ".runtime",
-                    buttonText: { displayText: "⏱ Runtime" },
-                    type: 1
-                },
-                {
-                    buttonId: ".ping",
-                    buttonText: { displayText: "🏓 Ping" },
-                    type: 1
-                }
-            ],
-            headerType: 1,
+            text: "🎵 Searching lyrics..." + POWERED_BY,
+            contextInfo: context
+        });
+
+        const response = await axios.get(
+            `https://api.popcat.xyz/lyrics?song=${encodeURIComponent(query)}`
+        );
+
+        const data = response.data;
+
+        await EliteProTech.sendMessage(sender, {
+            text:
+`🎶 *Title:* ${data.title}
+
+👤 *Artist:* ${data.artist}
+
+📝 *Lyrics:*
+${data.lyrics}` + POWERED_BY,
             contextInfo: context
         });
 
     } catch (err) {
-        console.error("Menu2 Error:", err);
+        console.error("Lyrics Error:", err);
 
         await EliteProTech.sendMessage(sender, {
-            text: "❌ Failed to load interactive menu." + POWERED_BY,
+            text: "❌ Lyrics not found." + POWERED_BY,
             contextInfo: context
         });
     }
