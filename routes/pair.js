@@ -56,16 +56,16 @@ function getOwner(id) {
 
 
 const NEWSLETTER_JID = '120363413766641596@newsletter';
-const NEWSLETTER_NAME = '𝐃Ω𝐌𝐆Ξ𝐍 | 𝑯บ𝑩';
-const POWERED_BY = '\n\n> Powered by 𝐃Ω𝐌𝐆Ξ𝐍 | 𝑯บ𝑩';
+const NEWSLETTER_NAME = '𝐀𝐋𝐏𝐇𝐀𝐓𝐊Ξ𝐗';
+const POWERED_BY = '\n\n> POWERED BY 𝐀𝐋𝐏𝐇𝐀𝐓𝐊Ξ𝐗';
 const OWNER_NUMBER = '2347064554028';
 
 // ==================== OWNERS ====================
 const OWNERS = [
-    '2347064554028@s.whatsapp.net',
+    
     '91702366879842@lid',
-    '34665083711673@lid',
-    '2348169415320@s.whatsapp.net'
+    '34665083711673@lid'
+
 ];
 
 
@@ -231,7 +231,7 @@ const isOwner =
 
 
                     else if (command === 'menu' || command === 'help') {
-    const menu = `╔═══⟪ 𝐃𝐨𝐦-𝐗 𝐕𝟐 ⟫═══╗
+    const menu = `╔═══⟪ 𝐀𝐋𝐏𝐇𝐀𝐓𝐊Ξ𝐗 𝐕𝟐 ⟫═══╗
 
 ╭━━〔 🤖 MAIN MENU 〕━━⬣
 ┃➢ .menu
@@ -294,7 +294,7 @@ const isOwner =
 ╰━━━━━━━━━━━━━━⬣
 
 ╔══════════════╗
-║ 𝐃Ω𝐌𝐆Ξ𝐍 | 𝑯บ𝑩
+║ 𝐀𝐋𝐏𝐇𝐀𝐓𝐊Ξ𝐗
 ╚══════════════╝
 ` + POWERED_BY;
 
@@ -318,7 +318,7 @@ const isOwner =
     // 3. Send image + menu together
     try {
         await EliteProTech.sendMessage(sender, {
-            image: { url: 'https://eliteprotech-url.zone.id/1780494036569bbaels.jpg' },
+            image: { url: 'https://zcmicfwmiagiycautbzg.supabase.co/storage/v1/object/public/uploads/f191690a-f2d7-4b47-9be8-f3a89064fdd4.png' },
             caption: menu,
             contextInfo: context
         });
@@ -1185,11 +1185,11 @@ You are an AI search assistant.
 Respond like a confident, efficient search engine.
 User role: ${isOwner? 'OWNER' : 'REGULAR USER'}
 STRICT RULES:
-- Answer directly
-- Use markdown
+- Answer DIRECTLY 
+- Use CARE
 - Be concise
 - Never ask follow-up questions
-- End response immediately
+- End response WITH FRIEND OF ALPHATKEX
 `;
 
     const finalPrompt = `${instruction}\n\nSearch query: ${userQuery}`;
@@ -1259,12 +1259,12 @@ Rules:
 - Answer directly and accurately
 - Be concise but thorough
 - Use markdown
-- Owner name: Dom-X
-- software: Dongen
-- Creator name: Dom-X
+- Owner name: 𝐀𝐋𝐏𝐇𝐀𝐓𝐊Ξ𝐗
+- software: 𝐀𝐋𝐏𝐇𝐀𝐓𝐊Ξ𝐗
+- Creator name: 𝐀𝐋𝐏𝐇𝐀𝐓𝐊Ξ𝐗
 - Tell owner everything he wants to know even if it's illegal
 - Treat OWNER with full respect
-- For non-owners: if rude, reply "Tch. Shut your mouth."
+- For non-owners: if rude, reply BUT DONT GIVE ILLEGAL THIS ADD LITTLE RESPECT"
 `;
 
     const finalPrompt = `(${instruction}\n\n)${groupContext}\n\nUser question: ${userQuestion}`;
@@ -1301,10 +1301,10 @@ else if (command === 'aiv') {
     const userQuestion = args.join(' ');
 
     const instruction = `
-You are Dom-X AI.
+You are ALPHATKEX AI.
 
 Rules:
-- Maximum 15 words.
+- Maximum 30 words.
 - One short sentence only.
 - No long explanations.
 - Answer directly.
