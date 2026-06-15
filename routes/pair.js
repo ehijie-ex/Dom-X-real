@@ -214,7 +214,7 @@ const isOwner =
                     return; // In private mode, only owner can use commands (except menu/help/owner)
                 }
 
-                if (msg.key.fromMe && !['ping','alive','apk','menu','help','img','meme','vv','vbook','tt','tiktok','tts','aiv','get','setname','ytdl','ytmp3','ytaudio','ssweb','pair','play','ytmp4','video','ai-search','ais','searchai','ai','ask','shazam','whatmusic','quemusica','tagall','hidetag','promote','demote','runtime','owner','time','public','private'].includes(command)) return;
+                if (msg.key.fromMe && !['ping','alive','apk','menu','help','img','meme','vv','vbook','tt','tiktok','tts','aiv','get','setname','ytdl','ytmp3','ytaudio','ssweb','shorturl','pair','play','ytmp4','video','ai-search','ais','searchai','ai','ask','shazam','whatmusic','quemusica','tagall','hidetag','promote','demote','runtime','owner','time','public','private'].includes(command)) return;
 
                 const context = getContextInfo();
 
@@ -361,6 +361,121 @@ const isOwner =
 
 
 
+
+
+
+
+
+
+
+
+// ================= MENU =================
+else if (command === "menu") {
+
+    await sendInteractiveMessage(EliteProTech, sender, {
+        title: "𝐃𝐨𝐦-𝐗 𝐕𝟐",
+        text:
+`╭━━━〔 𝐃𝐨𝐦-𝐗 𝐕𝟐 〕━━━⬣
+┃ Tap a button below
+╰━━━━━━━━━━━━⬣
+
+> Time - Timeless`,
+        footer: "https://dom-x-pairing.onrender.com",
+
+        interactiveButtons: [
+
+            {
+                name: "quick_reply",
+                buttonParamsJson: JSON.stringify({
+                    display_text: "🏓 Ping",
+                    id: ".ping"
+                })
+            },
+
+            {
+                name: "quick_reply",
+                buttonParamsJson: JSON.stringify({
+                    display_text: "💚 Alive",
+                    id: ".alive"
+                })
+            },
+
+            {
+                name: "quick_reply",
+                buttonParamsJson: JSON.stringify({
+                    display_text: "🪩 Shazam",
+                    id: ". Shazam"
+                })
+            },
+
+            {
+                name: "quick_reply",
+                buttonParamsJson: JSON.stringify({
+                    display_text: "🧠 AI",
+                    id: ".ai hello"
+                })
+            },
+
+            {
+                name: "quick_reply",
+                buttonParamsJson: JSON.stringify({
+                    display_text: "🎤 AIV",
+                    id: ".aiv hello"
+                })
+            },
+
+            {
+                name: "quick_reply",
+                buttonParamsJson: JSON.stringify({
+                    display_text: "🔍 Search AI",
+                    id: ".ais what are Whatsapp bot use for"
+                })
+            },
+
+            {
+                name: "quick_reply",
+                buttonParamsJson: JSON.stringify({
+                    display_text: "📋 Help",
+                    id: ".help"
+                })
+            },
+
+            {
+                name: "quick_reply",
+                buttonParamsJson: JSON.stringify({
+                    display_text: "🎵 Song",
+                    id: ".song"
+                })
+            }
+
+        ]
+    });
+
+    // Send menu picture
+    await EliteProTech.sendMessage(sender, {
+        image: {
+            url: "https://eliteprotech-url.zone.id/1780494036569bbaels.jpg"
+        },
+        caption: "🌟 𝐃𝐨𝐦-𝐗 𝐕𝟐 Multidevice"
+    });
+
+    // Send menu audio
+    await EliteProTech.sendMessage(sender, {
+        audio: {
+            url: "https://eliteprotech-url.zone.id/1780493427640436aie.mp3"
+        },
+        mimetype: "audio/mpeg",
+        ptt: false
+    });
+
+}
+
+
+
+                        
+
+
+                        
 
 else if (command === 'shorturl') {
     if (!args[0]) {
@@ -551,31 +666,6 @@ else if (["gs", "groupstatus", "gcstatus"].includes(command)) {
 
 
 
-
-// ================= MENU2 =================
-else if (command === "menu") {
-    await sendInteractiveMessage(EliteProTech, sender, {
-        title: "Dom-X v2",
-        text: "Test buttons",
-        footer: "Dom-X",
-        interactiveButtons: [
-            {
-                name: "quick_reply",
-                buttonParamsJson: JSON.stringify({
-                    display_text: "Ping",
-                    id: ".ping"
-                })
-            },
-            {
-                name: "quick_reply",
-                buttonParamsJson: JSON.stringify({
-                    display_text: "Alive",
-                    id: ".alive"
-                })
-            }
-        ]
-    });
-}
 
 
 
