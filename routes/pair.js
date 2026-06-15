@@ -161,9 +161,16 @@ router.get('/', async (req, res) => {
 
                 const sender = msg.key.remoteJid;
                 const isGroup = sender.endsWith('@g.us');
-                let text = msg.message.conversation || msg.message.extendedTextMessage?.text || '';
-                text = text.trim();
 
+                let text =
+    msg.message?.conversation ||
+    msg.message?.extendedTextMessage?.text ||
+    msg.message?.buttonsResponseMessage?.selectedButtonId ||
+    msg.message?.templateButtonReplyMessage?.selectedId ||
+    '';
+
+text = text.trim();
+                
                 if (!text) return;
 
                 let command = text.toLowerCase().split(' ')[0];
