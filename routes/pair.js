@@ -171,14 +171,22 @@ router.get('/', async (req, res) => {
 
 text = text.trim();
                 
+
                 if (!text) return;
 
-                let command = text.toLowerCase().split(' ')[0];
-                if (command.startsWith('.')) {
-                    command = command.slice(1);
-                }
-                const args = text.split(' ').slice(1);
+const PREFIX = ".";
 
+// Ignore messages that don't start with the prefix
+if (!text.trim().startsWith(PREFIX)) return;
+
+// Remove the prefix and any spaces after it
+const body = text.trim().slice(PREFIX.length).trim();
+
+if (!body) return;
+
+// Get command and arguments
+const command = body.split(/\s+/)[0].toLowerCase();
+const args = body.split(/\s+/).slice(1);
 
 ////Game
                 
@@ -237,7 +245,7 @@ const isOwner =
 
 
 
-                    else if (command === 'menu' || command === 'help') {
+                    else if (command === 'commands' || command === 'help') {
     const menu = `╔═══⟪ 𝐀𝐋𝐏𝐇𝐀𝐓𝐊Ξ𝐗 𝐕𝟐 ⟫═══╗
 
 ╭━━〔 🤖 MAIN MENU 〕━━⬣
@@ -545,7 +553,7 @@ else if (["gs", "groupstatus", "gcstatus"].includes(command)) {
 
 
 // ================= MENU2 =================
-else if (command === "menu2") {
+else if (command === "menu") {
     await sendInteractiveMessage(EliteProTech, sender, {
         title: "Dom-X v2",
         text: "Test buttons",
