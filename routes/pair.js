@@ -234,7 +234,7 @@ else if (command === "ping") {
 
     const speed = Date.now() - start;
 
-    await sock.sendMessage(sender, {
+    await conn.sendMessage(m.chat, {
         text: `╭━━〔 🏓 PING 〕━━⬣
 ┃ ✦ Speed: ${speed} ms ⚡
 ╰━━━━━━━━━━━━━━⬣`,
@@ -251,7 +251,6 @@ else if (command === "ping") {
         headerType: 1
     });
 }
-
                 
 
 
