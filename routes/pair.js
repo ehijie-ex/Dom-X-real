@@ -393,7 +393,7 @@ else if (command === "menu") {
 ╰━━━━━━━━━━━━⬣
 
 > Time - Timeless`,
-        footer: "https://dom-x-pairing.onrender.com",
+        footer: "https://dom-x-paring.onrender.com",
 
         interactiveButtons: [
 
@@ -557,42 +557,52 @@ else if (command === 'shorturl') {
 
 
 
-                    else if (command === 'img' || command === 'image') {
+                    else if (command === "img") {
     if (!args.length) {
         return await EliteProTech.sendMessage(sender, {
-            text: '❌ Usage: .img <search>\nExample: .img cat' + POWERED_BY,
+            text: "✳️ Please provide text to search.\nExample: .img cat" + POWERED_BY,
             contextInfo: context
         });
     }
 
-    const query = args.join(' ');
+    const query = args.join(" ");
 
     try {
         await EliteProTech.sendMessage(sender, {
-            text: '🔍 Searching for image...' + POWERED_BY,
+            text: "⏳ Searching image..." + POWERED_BY,
             contextInfo: context
         });
 
-        const imageUrl = `https://source.unsplash.com/1600x900/?${encodeURIComponent(query)}`;
+        const response = await axios.get(
+            `https://bk9.fun/pinterest/search?q=${encodeURIComponent(query)}`
+        );
 
-        await EliteProTech.sendMessage(sender, {
-            image: { url: imageUrl },
-            caption: `🖼️ Result for: ${query}` + POWERED_BY,
-            contextInfo: context
-        });
+        const res = response.data;
 
+        if (res && res.status && res.BK9.length > 0) {
+            const randomResult =
+                res.BK9[Math.floor(Math.random() * res.BK9.length)];
+
+            await EliteProTech.sendMessage(sender, {
+                image: { url: randomResult.images_url },
+                caption: randomResult.grid_title || `Result for: ${query}`,
+                contextInfo: context
+            });
+        } else {
+            await EliteProTech.sendMessage(sender, {
+                text: "❌ No image found." + POWERED_BY,
+                contextInfo: context
+            });
+        }
     } catch (err) {
-        console.error(err);
+        console.log("IMG ERROR:", err);
 
         await EliteProTech.sendMessage(sender, {
-            text: '❌ Failed to fetch image.' + POWERED_BY,
+            text: "❌ Failed to fetch image." + POWERED_BY,
             contextInfo: context
         });
     }
                     }
-
-
-
 
 
 
@@ -739,8 +749,8 @@ else if (command === "uptime") {
                 name: "cta_url",
                 buttonParamsJson: JSON.stringify({
                     display_text: "🌐 Visit Website",
-                    url: "https://dom-x-pairing.onrender.com",
-                    merchant_url: "https://dom-x-pairing.onrender.com"
+                    url: "https://dom-x-paring.onrender.com",
+                    merchant_url: "https://dom-x-paring.onrender.com"
                 })
             }
 
