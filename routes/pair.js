@@ -227,14 +227,17 @@ const isOwner =
                 }
 
                 // ================= PING COMMAND =================
-else if (command === "ping") {
+
+
+
+                    if (command === "ping") {
     const start = Date.now();
 
     await new Promise(resolve => setTimeout(resolve, 100));
 
     const speed = Date.now() - start;
 
-    await conn.sendMessage(m.chat, {
+    await EliteProTech.sendMessage(sender, {
         text: `╭━━〔 🏓 PING 〕━━⬣
 ┃ ✦ Speed: ${speed} ms ⚡
 ╰━━━━━━━━━━━━━━⬣`,
@@ -250,9 +253,9 @@ else if (command === "ping") {
         ],
         headerType: 1
     });
-}
-                
+                    }
 
+                        
 
 
 
