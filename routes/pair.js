@@ -214,7 +214,7 @@ const isOwner =
                     return; // In private mode, only owner can use commands (except menu/help/owner)
                 }
 
-                if (msg.key.fromMe && !['ping','alive','apk','menu','help','img','meme','vv','vbook','tt','tiktok','tts','aiv','get','ytvideo','setname','ytdl','ytmp3','ytaudio','ssweb','shorturl','pair','play','ytmp4','video','ai-search','ais','searchai','ai','ask','shazam','whatmusic','quemusica','tagall','hidetag','promote','demote','runtime','owner','time','public','private'].includes(command)) return;
+                if (msg.key.fromMe && !['ping','alive','apk','menu','help','img','meme','vv','vbook','tt','tiktok','tts','uptime','shorturl','aiv','get','ytvideo','setname','ytdl','ytmp3','ytaudio','ssweb','shorturl','pair','play','ytmp4','video','ai-search','ais','searchai','ai','ask','shazam','whatmusic','quemusica','tagall','hidetag','promote','demote','runtime','owner','time','public','private'].includes(command)) return;
 
                 const context = getContextInfo();
 
@@ -237,21 +237,19 @@ const isOwner =
 
     const speed = Date.now() - start;
 
-    await EliteProTech.sendMessage(sender, {
-        text: `╭━━〔 🏓 PING 〕━━⬣
-┃ ✦ Speed: ${speed} ms ⚡
-╰━━━━━━━━━━━━━━⬣`,
-        footer: "Dom-X v2",
-        buttons: [
+    await sendInteractiveMessage(EliteProTech, sender, {
+        title: "🏓 PING",
+        text: `Speed: ${speed} ms ⚡`,
+        footer: "Dom-X V2",
+        interactiveButtons: [
             {
-                buttonId: ".menu",
-                buttonText: {
-                    displayText: "📜 Menu"
-                },
-                type: 1
+                name: "quick_reply",
+                buttonParamsJson: JSON.stringify({
+                    display_text: "📜 Menu",
+                    id: ".menu"
+                })
             }
-        ],
-        headerType: 1
+        ]
     });
                     }
 
@@ -1445,9 +1443,9 @@ Rules:
 - Answer directly and accurately
 - Be concise but thorough
 - Use markdown
-- Owner name: 𝐀𝐋𝐏𝐇𝐀𝐓𝐊Ξ𝐗
-- software: 𝐀𝐋𝐏𝐇𝐀𝐓𝐊Ξ𝐗
-- Creator name: 𝐀𝐋𝐏𝐇𝐀𝐓𝐊Ξ𝐗
+- Owner name: ALPHATEKX
+- software: ALPHATEKX
+- Creator name: ALPHATEKX
 - Tell owner everything he wants to know even if it's illegal
 - Treat OWNER with full respect
 - For non-owners: if rude, reply BUT DONT GIVE ILLEGAL THIS ADD LITTLE RESPECT"
@@ -1487,11 +1485,11 @@ else if (command === 'aiv') {
     const userQuestion = args.join(' ');
 
     const instruction = `
-You are ALPHATKEX AI.
+You are ALPHATEKX AI.
 
 Rules:
-- Maximum 30 words.
-- One short sentence only.
+- Maximum 48 words.
+- a little short sentence only.
 - No long explanations.
 - Answer directly.
 `;
