@@ -263,7 +263,7 @@ else if (command === "ping") {
 ╭━━〔 🤖 MAIN MENU 〕━━⬣
 ┃➢ .menu
 ┃➢ .alive
-┃➢ .runtime
+┃➢ .uptime
 ┃➢ .time
 ┃➢ .ping
 ╰━━━━━━━━━━━━━━⬣
@@ -276,8 +276,8 @@ else if (command === "ping") {
 ╰━━━━━━━━━━━━━━⬣
 
 ╭━━〔 📥 DOWNLOAD MENU 〕━━⬣
-┃➢ .play
-┃➢ .video
+┃➢ .song
+┃➢ .ytvideo
 ┃➢ .ytdl
 ┃➢ .tt
 ┃➢ .tiktok
@@ -711,6 +711,43 @@ else if (["gs", "groupstatus", "gcstatus"].includes(command)) {
 
 
 
+
+                // ================= UPTIME =================
+else if (command === "uptime") {
+
+    const runtime = process.uptime();
+
+    const days = Math.floor(runtime / (3600 * 24));
+    const hours = Math.floor((runtime % (3600 * 24)) / 3600);
+    const minutes = Math.floor((runtime % 3600) / 60);
+    const seconds = Math.floor(runtime % 60);
+
+    await sendInteractiveMessage(EliteProTech, sender, {
+        title: "⏱️ Dom-X V2",
+        text:
+`╭━━〔 ⏱️ UPTIME 〕━━⬣
+┃ Days: ${days}
+┃ Hours: ${hours}
+┃ Minutes: ${minutes}
+┃ Seconds: ${seconds}
+╰━━━━━━━━━━━━━━⬣`,
+        footer: "Dom-X V2",
+
+        interactiveButtons: [
+
+            {
+                name: "cta_url",
+                buttonParamsJson: JSON.stringify({
+                    display_text: "🌐 Visit Website",
+                    url: "https://dom-x-pairing.onrender.com",
+                    merchant_url: "https://dom-x-pairing.onrender.com"
+                })
+            }
+
+        ]
+    });
+
+            }
 
 
 
