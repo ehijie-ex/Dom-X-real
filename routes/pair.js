@@ -214,7 +214,7 @@ const isOwner =
                     return; // In private mode, only owner can use commands (except menu/help/owner)
                 }
 
-                if (msg.key.fromMe && !['ping','alive','apk','menu','help','img','meme','vv','vbook','tt','tiktok','tts','uptime','shorturl','aiv','get','ytvideo','setname','ytdl','ytmp3','ytaudio','ssweb','shorturl','pair','play','ytmp4','video','ai-search','ais','searchai','ai','ask','shazam','whatmusic','quemusica','tagall','hidetag','promote','demote','runtime','owner','time','public','private'].includes(command)) return;
+                if (msg.key.fromMe && !['ping','alive','apk','menu','help','img','meme','vv','vbook','tt','tiktok','tts','uptime','shorturl','aiv','get','ytvideo','waifu','neko','setname','ytdl','ytmp3','ytaudio','ssweb','shorturl','pair','play','ytmp4','video','ai-search','ais','searchai','ai','ask','shazam','whatmusic','quemusica','tagall','hidetag','promote','demote','runtime','owner','time','public','private'].includes(command)) return;
 
                 const context = getContextInfo();
 
@@ -427,7 +427,41 @@ else if (command === "menu") {
 }
     
 
-                        
+
+
+
+
+
+    else if (["waifu", "neko", "zerotwo", "loli"].includes(command)) {
+    try {
+        await EliteProTech.sendMessage(sender, {
+            text: "⏳ Fetching image..." + POWERED_BY,
+            contextInfo: context
+        });
+
+        const endpoint = `https://weeb-api.vercel.app/${command}`;
+
+        const response = await axios.get(endpoint, {
+            responseType: "arraybuffer"
+        });
+
+        const buffer = Buffer.from(response.data);
+
+        await EliteProTech.sendMessage(sender, {
+            image: buffer,
+            caption: `✅ Random ${command}`,
+            contextInfo: context
+        });
+
+    } catch (err) {
+        console.error(`${command} error:`, err);
+
+        await EliteProTech.sendMessage(sender, {
+            text: `❌ Failed to fetch ${command} image.` + POWERED_BY,
+            contextInfo: context
+        });
+    }
+            }
 
 
 
