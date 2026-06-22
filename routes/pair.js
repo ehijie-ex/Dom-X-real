@@ -8,6 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 const yts = require('yt-search');
+const fg = require("api-dylux");
 const acrcloud = require('acrcloud');
 const wgcGames = {};
 const { sendInteractiveMessage } = require('gifted-btns');
@@ -214,7 +215,7 @@ const isOwner =
                     return; // In private mode, only owner can use commands (except menu/help/owner)
                 }
 
-                if (msg.key.fromMe && !['ping','alive','apk','menu','help','img','meme','vv','vbook','tt','tiktok','tts','uptime','shorturl','aiv','get','ytvideo','waifu','neko','setname','ytdl','ytmp3','ytaudio','ssweb','shorturl','pair','play','ytmp4','video','ai-search','ais','searchai','ai','ask','shazam','whatmusic','quemusica','tagall','hidetag','promote','demote','runtime','owner','time','public','private'].includes(command)) return;
+                if (msg.key.fromMe && !['ping','alive','apk','menu','help','img','meme','vv','fb','vbook','tt','tiktok','tts','uptime','shorturl','aiv','get','ytvideo','waifu','neko','setname','ytdl','ytmp3','ytaudio','ssweb','shorturl','pair','play','ytmp4','video','ai-search','ais','searchai','ai','ask','shazam','whatmusic','quemusica','tagall','hidetag','promote','demote','runtime','owner','time','public','private'].includes(command)) return;
 
                 const context = getContextInfo();
 
@@ -282,7 +283,7 @@ const isOwner =
 ┃➢ .tt
 ┃➢ .tiktok
 ┃➢ .vv
-┃➢ .vbook
+┃➢ .fb
 ╰━━━━━━━━━━━━━━⬣
 
 ╭━━〔 🖼️ MEDIA MENU 〕━━⬣
@@ -548,7 +549,52 @@ else if (['mp4', 'ytvideo'].includes(command)) {
 
 
 
+else if (["facebook", "fb", "fbdl", "facebookdl"].includes(command)) {
+    if (!args[0]) {
+        return await EliteProTech.sendMessage(sender, {
+            text: `✳️ Please send the link of a Facebook video.\n\nExample:\n.${command} https://www.facebook.com/...` + POWERED_BY,
+            contextInfo: context
+        });
+    }
 
+    const urlRegex = /^(?:https?:\/\/)?(?:www\.)?(?:facebook\.com|fb\.watch)\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/i;
+
+    if (!urlRegex.test(args[0])) {
+        return await EliteProTech.sendMessage(sender, {
+            text: "⚠️ Please provide a valid Facebook URL." + POWERED_BY,
+            contextInfo: context
+        });
+    }
+
+    try {
+        await EliteProTech.sendMessage(sender, {
+            text: "⏳ Downloading video..." + POWERED_BY,
+            contextInfo: context
+        });
+
+        const result = await fg.fbdl(args[0]);
+
+        await EliteProTech.sendMessage(sender, {
+            video: { url: result.videoUrl },
+            mimetype: "video/mp4",
+            caption:
+`⊱ ───〔 FBDL 〕─── ⊰
+
+🎬 Title: ${result.title}
+
+⊱ ─────────────── ⊰` + POWERED_BY,
+            contextInfo: context
+        });
+
+    } catch (err) {
+        console.error("FBDL Error:", err);
+
+        await EliteProTech.sendMessage(sender, {
+            text: "❌ Failed to download Facebook video." + POWERED_BY,
+            contextInfo: context
+        });
+    }
+            }
     
 
                         
@@ -590,6 +636,7 @@ else if (command === 'shorturl') {
 
 
 
+    
 
                     else if (command === "img") {
     if (!args.length) {
