@@ -214,7 +214,7 @@ const isOwner =
                     return; // In private mode, only owner can use commands (except menu/help/owner)
                 }
 
-                if (msg.key.fromMe && !['ping','alive','apk','menu','help','img','meme','vv','vbook','tt','tiktok','tts','aiv','get','setname','ytdl','ytmp3','ytaudio','ssweb','shorturl','pair','play','ytmp4','video','ai-search','ais','searchai','ai','ask','shazam','whatmusic','quemusica','tagall','hidetag','promote','demote','runtime','owner','time','public','private'].includes(command)) return;
+                if (msg.key.fromMe && !['ping','alive','apk','menu','help','img','meme','vv','vbook','tt','tiktok','tts','aiv','get','ytvideo','setname','ytdl','ytmp3','ytaudio','ssweb','shorturl','pair','play','ytmp4','video','ai-search','ais','searchai','ai','ask','shazam','whatmusic','quemusica','tagall','hidetag','promote','demote','runtime','owner','time','public','private'].includes(command)) return;
 
                 const context = getContextInfo();
 
@@ -429,6 +429,93 @@ else if (command === "menu") {
 
                         
 
+
+
+
+else if (['mp4', 'ytvideo'].includes(command)) {
+    if (!args[0]) {
+        return await EliteProTech.sendMessage(sender, {
+            text: "Usage:\n`video <youtube link or search>`" + POWERED_BY,
+            contextInfo: context
+        });
+    }
+
+    await EliteProTech.sendMessage(sender, {
+        text: "⭐ Please wait... Processing request." + POWERED_BY,
+        contextInfo: context
+    });
+
+    try {
+        let input = args.join(" ").trim();
+        let finalUrl = input;
+
+        if (!input.includes("youtube.com") && !input.includes("youtu.be")) {
+            const results = await yts(input);
+
+            if (!results.videos.length) {
+                return await EliteProTech.sendMessage(sender, {
+                    text: "No results found on YouTube." + POWERED_BY,
+                    contextInfo: context
+                });
+            }
+
+            finalUrl = results.videos[0].url;
+        }
+
+        const apiUrl = `https://api-abztech.zone.id/download/ytdlv3?url=${encodeURIComponent(finalUrl)}`;
+        const apiRes = await axios.get(apiUrl);
+        const data = apiRes.data;
+
+        if (!data.status) {
+            return await EliteProTech.sendMessage(sender, {
+                text: `API Error: ${data.message || "Unknown error"}` + POWERED_BY,
+                contextInfo: context
+            });
+        }
+
+        const { downloadUrl, filename, title, thumbnail } = data;
+
+        const videoRes = await axios.get(downloadUrl, {
+            responseType: "arraybuffer"
+        });
+
+        const buffer = Buffer.from(videoRes.data);
+
+        const cleanName = (title || filename || "video")
+            .replace(/[\\/:*?"<>|]/g, "")
+            .trim();
+
+        await EliteProTech.sendMessage(sender, {
+            video: buffer,
+            mimetype: "video/mp4",
+            fileName: `${cleanName}.mp4`,
+            caption: `🎬 ${title || cleanName}` + POWERED_BY,
+            contextInfo: context
+        });
+
+        if (thumbnail) {
+            await EliteProTech.sendMessage(sender, {
+                image: { url: thumbnail },
+                caption: `🖼️ ${title || cleanName}` + POWERED_BY,
+                contextInfo: context
+            });
+        }
+
+    } catch (err) {
+        console.error("YTMP4 error:", err.message);
+
+        await EliteProTech.sendMessage(sender, {
+            text: "❌ Failed to process request." + POWERED_BY,
+            contextInfo: context
+        });
+    }
+            }
+
+
+
+
+
+    
 
                         
 
