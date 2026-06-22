@@ -226,19 +226,31 @@ const isOwner =
                     });
                 }
 
-                if (command === 'ping') {
-                    await EliteProTech.sendMessage(sender, { 
-                        text: '🏓 *Pong!* Bot is super fast!' + POWERED_BY, 
-                        contextInfo: context 
-                    });
-                }
+                // ================= PING COMMAND =================
+else if (command === "ping") {
+    const start = Date.now();
 
-                else if (command === 'alive') {
-                    await EliteProTech.sendMessage(sender, {
-                        text: `🌟 *Dom-X MD Bot is Alive!*\n\n⏱️ Runtime: ${getRuntime()}\n📡 Status: Online` + POWERED_BY,
-                        contextInfo: context
-                    });
-                }
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    const speed = Date.now() - start;
+
+    await sock.sendMessage(sender, {
+        text: `╭━━〔 🏓 PING 〕━━⬣
+┃ ✦ Speed: ${speed} ms ⚡
+╰━━━━━━━━━━━━━━⬣`,
+        footer: "Dom-X v2",
+        buttons: [
+            {
+                buttonId: ".menu",
+                buttonText: {
+                    displayText: "📜 Menu"
+                },
+                type: 1
+            }
+        ],
+        headerType: 1
+    });
+}
 
                 
 
@@ -370,6 +382,7 @@ const isOwner =
 
 
 // ================= MENU =================
+                // ================= MENU =================
 else if (command === "menu") {
 
     await sendInteractiveMessage(EliteProTech, sender, {
@@ -403,74 +416,16 @@ else if (command === "menu") {
             {
                 name: "quick_reply",
                 buttonParamsJson: JSON.stringify({
-                    display_text: "🪩 Shazam",
-                    id: ". Shazam"
-                })
-            },
-
-            {
-                name: "quick_reply",
-                buttonParamsJson: JSON.stringify({
-                    display_text: "🧠 AI",
-                    id: ".ai hello"
-                })
-            },
-
-            {
-                name: "quick_reply",
-                buttonParamsJson: JSON.stringify({
-                    display_text: "🎤 AIV",
-                    id: ".aiv hello"
-                })
-            },
-
-            {
-                name: "quick_reply",
-                buttonParamsJson: JSON.stringify({
-                    display_text: "🔍 Search AI",
-                    id: ".ais what are Whatsapp bot use for"
-                })
-            },
-
-            {
-                name: "quick_reply",
-                buttonParamsJson: JSON.stringify({
-                    display_text: "📋 Help",
+                    display_text: "📜 All Commands",
                     id: ".help"
-                })
-            },
-
-            {
-                name: "quick_reply",
-                buttonParamsJson: JSON.stringify({
-                    display_text: "🎵 Song",
-                    id: ".song"
                 })
             }
 
         ]
     });
 
-    // Send menu picture
-    await EliteProTech.sendMessage(sender, {
-        image: {
-            url: "https://eliteprotech-url.zone.id/1780494036569bbaels.jpg"
-        },
-        caption: "🌟 𝐃𝐨𝐦-𝐗 𝐕𝟐 Multidevice"
-    });
-
-    // Send menu audio
-    await EliteProTech.sendMessage(sender, {
-        audio: {
-            url: "https://eliteprotech-url.zone.id/1780493427640436aie.mp3"
-        },
-        mimetype: "audio/mpeg",
-        ptt: false
-    });
-
 }
-
-
+    
 
                         
 
