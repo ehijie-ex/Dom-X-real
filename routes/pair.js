@@ -636,6 +636,177 @@ else if (command === 'shorturl') {
 
 
 
+// Add member
+else if (command === "add") {
+    if (!isGroup) {
+        return await EliteProTech.sendMessage(sender, {
+            text: "❌ This command can only be used in groups!"
+        });
+    }
+
+    if (!args[0]) {
+        return await EliteProTech.sendMessage(sender, {
+            text: "❌ Usage: .add 234xxxxxxxxxx"
+        });
+    }
+
+    let number = args[0].replace(/[^0-9]/g, "");
+    let jid = number + "@s.whatsapp.net";
+
+    await sendInteractiveMessage(EliteProTech, sender, {
+        title: "⚠️ Confirm Add",
+        text: `Add ${number} to the group?`,
+        footer: "Dom-X",
+        interactiveButtons: [
+            {
+                name: "quick_reply",
+                buttonParamsJson: JSON.stringify({
+                    display_text: "✅ Yes Add",
+                    id: `.confirmadd ${number}`
+                })
+            }
+        ]
+    });
+}
+
+// Confirm add
+else if (command === "confirmadd") {
+    if (!isGroup) return;
+
+    if (!args[0]) return;
+
+    let number = args[0].replace(/[^0-9]/g, "");
+    let jid = number + "@s.whatsapp.net";
+
+    try {
+        await EliteProTech.groupParticipantsUpdate(
+            sender,
+            [jid],
+            "add"
+        );
+
+        await EliteProTech.sendMessage(sender, {
+            text: `✅ Successfully added ${number}`
+        });
+
+    } catch (err) {
+        console.log(err);
+
+        await EliteProTech.sendMessage(sender, {
+            text: "❌ Failed to add user."
+        });
+    }
+            }
+
+
+            // Kickall
+else if (command === "kickall") {
+    if (!isGroup) {
+        return await EliteProTech.sendMessage(sender, {
+            text: "❌ Group only command!"
+        });
+    }
+
+    await sendInteractiveMessage(EliteProTech, sender, {
+        title: "⚠️ Confirm KickAll",
+        text: "Remove all non-admin members?",
+        footer: "Dom-X",
+        interactiveButtons: [
+            {
+                name: "quick_reply",
+                buttonParamsJson: JSON.stringify({
+                    display_text: "🔥 Confirm KickAll",
+                    id: ".confirmkickall"
+                })
+            }
+        ]
+    });
+}
+
+// Confirm kickall
+else if (command === "confirmkickall") {
+    if (!isGroup) return;
+
+    const metadata = await EliteProTech.groupMetadata(sender);
+
+    const admins = metadata.participants
+        .filter(p => p.admin)
+        .map(p => p.id);
+
+    const members = metadata.participants
+        .map(p => p.id)
+        .filter(id => !admins.includes(id));
+
+    if (members.length) {
+        await EliteProTech.groupParticipantsUpdate(
+            sender,
+            members,
+            "remove"
+        );
+    }
+
+    await EliteProTech.sendMessage(sender, {
+        text: `✅ Removed ${members.length} members.`
+    });
+}
+
+
+
+                                       // Kick command
+else if (command === "kick") {
+    if (!isGroup) {
+        return await EliteProTech.sendMessage(sender, {
+            text: "❌ Group only command!"
+        });
+    }
+
+    const mentioned =
+        msg.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
+
+    if (!mentioned.length) {
+        return await EliteProTech.sendMessage(sender, {
+            text: "❌ Tag a user to kick."
+        });
+    }
+
+    const target = mentioned[0];
+
+    await sendInteractiveMessage(EliteProTech, sender, {
+        title: "⚠️ Confirm Kick",
+        text: `Kick @${target.split("@")[0]} ?`,
+        footer: "Dom-X",
+        interactiveButtons: [
+            {
+                name: "quick_reply",
+                buttonParamsJson: JSON.stringify({
+                    display_text: "✅ Yes Kick",
+                    id: `.confirmkick ${target}`
+                })
+            }
+        ]
+    });
+}
+
+// Confirm kick
+else if (command === "confirmkick") {
+    if (!isGroup) return;
+
+    const target = args[0];
+
+    await EliteProTech.groupParticipantsUpdate(
+        sender,
+        [target],
+        "remove"
+    );
+
+    await EliteProTech.sendMessage(sender, {
+        text: "✅ User kicked."
+    });
+        }
+
+
+
+    
     
 
                     else if (command === "img") {
