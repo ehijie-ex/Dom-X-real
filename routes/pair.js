@@ -57,8 +57,8 @@ function getOwner(id) {
 
 
 const NEWSLETTER_JID = '120363413766641596@newsletter';
-const NEWSLETTER_NAME = '𝐀𝐋𝐏𝐇𝐀𝐓𝐊Ξ𝐗';
-const POWERED_BY = '\n\n> POWERED BY 𝐀𝐋𝐏𝐇𝐀𝐓𝐊Ξ𝐗';
+const NEWSLETTER_NAME = '𝐀𝐋𝐏𝐇𝐀𝐓Ξ𝐊𝐗';
+const POWERED_BY = '\n\n> POWERED BY 𝐀𝐋𝐏𝐇𝐀𝐓Ξ𝐊𝐗';
 const OWNER_NUMBER = '2347064554028';
 
 // ==================== OWNERS ====================
