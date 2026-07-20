@@ -290,6 +290,7 @@ const isOwner =
 ┃➢ .img
 ┃➢ .meme
 ┃➢ .tourl
+┃➢ .toimg
 ┃➢ .sticker
 ┃➢ .shazam
 ╰━━━━━━━━━━━━━━⬣
@@ -430,6 +431,60 @@ else if (command === "menu") {
 
 
 
+
+else if (command === "toimg") {
+    const quoted = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+
+    if (!quoted || !quoted.stickerMessage) {
+        return await EliteProTech.sendMessage(sender, {
+            text: "❌ Reply to a sticker with `.toimg`" + POWERED_BY,
+            contextInfo: context
+        });
+    }
+
+    try {
+        await EliteProTech.sendMessage(sender, {
+            text: "🖼️ Converting sticker to image...",
+            contextInfo: context
+        });
+
+        const mediaMsg = {
+            key: {
+                remoteJid: sender,
+                id: msg.message.extendedTextMessage.contextInfo.stanzaId
+            },
+            message: quoted
+        };
+
+        const buffer = await downloadMediaMessage(
+            mediaMsg,
+            "buffer",
+            {},
+            {}
+        );
+
+        const sharp = require("sharp");
+
+        const image = await sharp(buffer)
+            .png()
+            .toBuffer();
+
+        await EliteProTech.sendMessage(sender, {
+            image: image,
+            caption: "✅ Sticker converted to image." + POWERED_BY,
+            contextInfo: context
+        });
+
+    } catch (err) {
+        console.log(err);
+        await EliteProTech.sendMessage(sender, {
+            text: "❌ Failed to convert sticker." + POWERED_BY,
+            contextInfo: context
+        });
+    }
+}
+                    
+    
 
 
 
